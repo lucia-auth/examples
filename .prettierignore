@@ -1,0 +1,27 @@
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+/.vscode
+/.auri/*.md
+
+/sveltekit/**/.svelte-kit
+/nextjs-app/**/.next
+/nextjs-pages/**/.next
+/nuxt/**/.nuxt
+/nuxt/**/.output
+/solidstart/**/.solid
+/expo/**/.expo
+/tauri/**/src-tauri/target
+/electron/**/.vite
+
+
+# Ignore files for PNPM, NPM and YARN
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+

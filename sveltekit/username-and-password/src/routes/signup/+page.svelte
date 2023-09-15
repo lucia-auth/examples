@@ -15,6 +15,6 @@
 	<input type="submit" />
 </form>
 {#if form?.message}
-<p class="error">{form.message}</p>
+	<p class="error">{form.message}</p>
 {/if}
 <a href="/login">Sign in</a>

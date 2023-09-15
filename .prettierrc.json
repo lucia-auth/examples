@@ -1,0 +1,13 @@
+{
+	"useTabs": true,
+	"trailingComma": "none",
+	"plugins": ["prettier-plugin-svelte", "prettier-plugin-astro"],
+	"overrides": [
+		{
+			"files": "*.astro",
+			"options": {
+				"parser": "astro"
+			}
+		}
+	]
+}
