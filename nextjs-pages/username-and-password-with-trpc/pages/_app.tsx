@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import Head from "next/head";
 import type { AppProps, AppType } from "next/app";
-import { trpc } from '../utils/trpc';
+import { trpc } from "../utils/trpc";
 
 const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
 	return (
@@ -12,6 +12,6 @@ const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
 			<Component {...pageProps} />;
 		</>
 	);
-}
+};
 
 export default trpc.withTRPC(MyApp);

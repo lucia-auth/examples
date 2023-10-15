@@ -7,6 +7,7 @@ import type {
 	InferGetServerSidePropsType
 } from "next";
 import { trpc } from "@/utils/trpc";
+import { useEffect } from "react";
 
 export const getServerSideProps = async (
 	context: GetServerSidePropsContext
@@ -39,6 +40,9 @@ const Page = (
 ) => {
 	const router = useRouter();
 	const me = trpc.me.useQuery();
+	useEffect(() => {
+		me.refetch();
+	}, []);
 
 	return (
 		<>

@@ -7,8 +7,8 @@
  * @see https://trpc.io/docs/v10/router
  * @see https://trpc.io/docs/v10/procedures
  */
-import { TRPCError, initTRPC } from '@trpc/server';
-import { typeCreateContext } from './context';
+import { TRPCError, initTRPC } from "@trpc/server";
+import { typeCreateContext } from "./context";
 
 const t = initTRPC.context<typeCreateContext>().create();
 
@@ -24,15 +24,15 @@ export const middleware = t.middleware;
  * Protected procedure
  **/
 const isAuthed = t.middleware((opts) => {
-    const { ctx } = opts;
-    if (!ctx.session) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    return opts.next({
-        ctx: {
-            session: ctx.session,
-        },
-    });
+	const { ctx } = opts;
+	if (!ctx.session) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+	return opts.next({
+		ctx: {
+			session: ctx.session
+		}
+	});
 });
 
 export const protectedProcedure = t.procedure.use(isAuthed);
