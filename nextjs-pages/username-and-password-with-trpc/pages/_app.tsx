@@ -1,10 +1,9 @@
 import "@/styles/globals.css";
-
 import Head from "next/head";
+import type { AppProps, AppType } from "next/app";
+import { trpc } from '../utils/trpc';
 
-import type { AppProps } from "next/app";
-
-export default function App({ Component, pageProps }: AppProps) {
+const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
 	return (
 		<>
 			<Head>
@@ -14,3 +13,5 @@ export default function App({ Component, pageProps }: AppProps) {
 		</>
 	);
 }
+
+export default trpc.withTRPC(MyApp);

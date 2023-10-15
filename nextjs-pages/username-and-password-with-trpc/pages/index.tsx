@@ -6,6 +6,7 @@ import type {
 	GetServerSidePropsResult,
 	InferGetServerSidePropsType
 } from "next";
+import { trpc } from "@/utils/trpc";
 
 export const getServerSideProps = async (
 	context: GetServerSidePropsContext
@@ -37,11 +38,13 @@ const Page = (
 	props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
 	const router = useRouter();
+	const me = trpc.me.useQuery();
+
 	return (
 		<>
 			<h1>Profile</h1>
-			<p>User id: {props.userId}</p>
-			<p>Username: {props.username}</p>
+			<p>User id: {me.data?.user?.userId}</p>
+			<p>Username: {me.data?.user?.username}</p>
 			<form
 				method="post"
 				action="/api/logout"
