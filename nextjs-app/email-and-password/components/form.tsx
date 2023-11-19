@@ -38,7 +38,7 @@ const Form = (props: {
 						setErrorMessage(result.error ?? null);
 						return;
 					}
-					setSuccessMessage(props.successMessage);
+					setSuccessMessage(props.successMessage ?? null);
 				}}
 			>
 				{props.children}
