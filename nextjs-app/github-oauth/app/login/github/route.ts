@@ -1,6 +1,6 @@
 import { auth, githubAuth } from "@/auth/lucia";
 import * as context from "next/headers";
-
+import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 
 export const GET = async (request: NextRequest) => {
