@@ -1,7 +1,8 @@
 import { dev } from '$app/environment';
 import { githubAuth } from '$lib/server/lucia.js';
+import type { RequestHandler } from './$types';
 
-export const GET = async ({ cookies, locals }) => {
+export const GET : RequestHandler = async ({ cookies, locals }) => {
 	const session = await locals.auth.validate();
 	if (session) {
 		return new Response(null, {

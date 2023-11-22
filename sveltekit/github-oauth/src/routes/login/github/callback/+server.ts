@@ -1,7 +1,8 @@
 import { auth, githubAuth } from '$lib/server/lucia.js';
 import { OAuthRequestError } from '@lucia-auth/oauth';
+import type { RequestHandler } from '../$types';
 
-export const GET = async ({ url, cookies, locals }) => {
+export const GET: RequestHandler = async ({ url, cookies, locals }) => {
 	const session = await locals.auth.validate();
 	if (session) {
 		return new Response(null, {
