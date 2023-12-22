@@ -1,6 +1,5 @@
 {
 	"name": "username-and-password",
-	"description": "Username & password example with Lucia and SvelteKit",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -8,31 +7,24 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"format": "prettier --plugin-search-dir . --write ."
-	},
-	"dependencies": {
-		"@lucia-auth/adapter-sqlite": "latest",
-		"better-sqlite3": "^8.4.0",
-		"lucia": "latest"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^2.0.0",
-		"@sveltejs/kit": "^1.20.4",
-		"@types/better-sqlite3": "^7.6.3",
-		"@typescript-eslint/eslint-plugin": "^5.45.0",
-		"@typescript-eslint/parser": "^5.45.0",
-		"eslint": "^8.28.0",
-		"eslint-config-prettier": "^8.5.0",
-		"eslint-plugin-svelte": "^2.30.0",
-		"prettier": "^2.8.0",
-		"prettier-plugin-svelte": "^2.10.1",
-		"svelte": "^4.0.0",
-		"svelte-check": "^3.4.3",
+		"@sveltejs/adapter-auto": "^3.0.0",
+		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "^3.0.0",
+		"@types/better-sqlite3": "^7.6.8",
+		"svelte": "^4.2.7",
+		"svelte-check": "^3.6.0",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
-		"vite": "^4.3.6"
+		"vite": "^5.0.3"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@lucia-auth/adapter-sqlite": "3.0.0-beta.11",
+		"better-sqlite3": "^9.2.2",
+		"lucia": "3.0.0-beta.13",
+		"oslo": "^0.25.1"
+	}
 }
