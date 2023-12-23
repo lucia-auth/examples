@@ -3,8 +3,11 @@ import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { db } from "./db";
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { webcrypto } from "crypto";
 
 import type { Session, User } from "lucia";
+
+globalThis.crypto = webcrypto as Crypto;
 
 const adapter = new BetterSqlite3Adapter(db, {
 	user: "user",

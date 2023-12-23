@@ -4,8 +4,11 @@ import { db } from "./db";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { GitHub } from "arctic";
+import { webcrypto } from "crypto";
 
 import type { Session, User } from "lucia";
+
+globalThis.crypto = webcrypto as Crypto;
 
 const adapter = new BetterSqlite3Adapter(db, {
 	user: "user",
