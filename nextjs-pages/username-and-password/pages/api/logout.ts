@@ -4,11 +4,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	if (req.method !== "POST") {
-		return res.status(404).end();
+		res.status(404).end();
+		return;
 	}
 	const { session } = await validateRequest(req, res);
 	if (!session) {
-		return res.status(401).end();
+		res.status(401).end();
+		return;
 	}
 	return res
 		.setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize())

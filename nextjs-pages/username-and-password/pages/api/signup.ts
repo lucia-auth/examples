@@ -8,21 +8,24 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	if (req.method !== "POST") {
-		return res.status(404).end();
+		res.status(404).end();
+		return;
 	}
 
 	const body: null | Partial<{ username: string; password: string }> = req.body;
 	const username = body?.username;
 	if (!username || username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
-		return res.status(400).json({
+		res.status(400).json({
 			error: "Invalid username"
 		});
+		return;
 	}
 	const password = body?.password;
 	if (!password || password.length < 6 || password.length > 255) {
-		return res.status(400).json({
+		res.status(400).json({
 			error: "Invalid password"
 		});
+		return;
 	}
 
 	const hashedPassword = await new Argon2id().hash(password);
@@ -42,12 +45,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			.end();
 	} catch (e) {
 		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
-			return res.status(400).json({
+			res.status(400).json({
 				error: "Username already used"
 			});
+			return;
 		}
-		return res.status(500).json({
+		res.status(500).json({
 			error: "Unknown error"
 		});
+		return;
 	}
 }

@@ -3,8 +3,6 @@ import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { dev } from "$app/environment";
 import { db } from "./db";
 
-import type { DatabaseUser } from "./db";
-
 const adapter = new BetterSqlite3Adapter(db, {
 	user: "user",
 	session: "session"
@@ -27,5 +25,7 @@ declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
 	}
-	interface DatabaseUserAttributes extends Omit<DatabaseUser, "id"> {}
+	interface DatabaseUserAttributes {
+		username: string;
+	}
 }
