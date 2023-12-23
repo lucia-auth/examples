@@ -1,8 +1,8 @@
-import { lucia } from "../../utils/auth";
+import { lucia } from "../../lib/auth";
 import { Argon2id } from "oslo/password";
-import { db } from "../../utils/db";
+import { db } from "../../lib/db";
 
-import type { DatabaseUser } from "../../utils/db";
+import type { DatabaseUser } from "../../lib/db";
 import type { APIContext } from "astro";
 
 export async function POST(context: APIContext): Promise<Response> {

@@ -1,7 +1,7 @@
-import { lucia } from "../../utils/auth";
+import { lucia } from "../../lib/auth";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
-import { db } from "../../utils/db";
+import { db } from "../../lib/db";
 import { SqliteError } from "better-sqlite3";
 
 import type { APIContext } from "astro";
@@ -30,7 +30,7 @@ export async function POST(context: APIContext): Promise<Response> {
 	if (typeof password !== "string" || password.length < 6 || password.length > 255) {
 		return new Response(
 			JSON.stringify({
-				message: "Invalid password"
+				error: "Invalid password"
 			}),
 			{
 				status: 400

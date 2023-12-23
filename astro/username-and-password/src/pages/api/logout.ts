@@ -1,4 +1,4 @@
-import { lucia } from "../../utils/auth";
+import { lucia } from "../../lib/auth";
 
 import type { APIContext } from "astro";
 
@@ -11,12 +11,8 @@ export async function POST(context: APIContext): Promise<Response> {
 
 	await lucia.invalidateSession(context.locals.session.id);
 
-	const blankSessionCookie = lucia.createBlankSessionCookie();
-	context.cookies.set(
-		blankSessionCookie.name,
-		blankSessionCookie.value,
-		blankSessionCookie.attributes
-	);
+	const sessionCookie = lucia.createBlankSessionCookie();
+	context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 
 	return new Response();
 }

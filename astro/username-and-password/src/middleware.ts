@@ -1,4 +1,4 @@
-import { lucia } from "./utils/auth";
+import { lucia } from "./lib/auth";
 import { verifyRequestOrigin } from "oslo/request";
 import { defineMiddleware } from "astro:middleware";
 

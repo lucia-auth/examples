@@ -1,0 +1,53 @@
+import { lucia } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { generateId } from "lucia";
+import { Argon2id } from "oslo/password";
+import { SqliteError } from "better-sqlite3";
+
+import type { NextApiRequest, NextApiResponse } from "next";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+	if (req.method !== "POST") {
+		return res.status(404).end();
+	}
+
+	const body: null | Partial<{ username: string; password: string }> = req.body;
+	const username = body?.username;
+	if (!username || username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
+		return res.status(400).json({
+			error: "Invalid username"
+		});
+	}
+	const password = body?.password;
+	if (!password || password.length < 6 || password.length > 255) {
+		return res.status(400).json({
+			error: "Invalid password"
+		});
+	}
+
+	const hashedPassword = await new Argon2id().hash(password);
+	const userId = generateId(15);
+
+	try {
+		db.prepare("INSERT INTO user (id, username, password) VALUES(?, ?, ?)").run(
+			userId,
+			username,
+			hashedPassword
+		);
+
+		const session = await lucia.createSession(userId, {});
+		res
+			.appendHeader("Set-Cookie", lucia.createSessionCookie(session.id).serialize())
+			.status(200)
+			.end();
+	} catch (e) {
+		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
+			return res.status(400).json({
+				error: "Username already used"
+			});
+		}
+		return res.status(500).json({
+			error: "Unknown error"
+		});
+	}
+}

@@ -38,8 +38,8 @@ if (Astro.locals.user) {
 		});
 		if (response.ok) {
 			window.location.href = "/";
-			return;
+		} else {
+			errorMessageElement.innerText = (await response.json()).error;
 		}
-		errorMessageElement.innerText = (await response.json()).error;
 	});
 </script>
