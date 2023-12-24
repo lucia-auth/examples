@@ -1,8 +1,6 @@
 import { Lucia } from "lucia";
 import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { db } from "./db";
-import { cache, redirect } from "@solidjs/router";
-import { getRequestEvent } from "solid-js/web";
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
 

@@ -1,4 +1,4 @@
-import { action, redirect, useAction, useSubmission } from "@solidjs/router";
+import { action, redirect, useSubmission } from "@solidjs/router";
 import { Argon2id } from "oslo/password";
 import { Show, getRequestEvent } from "solid-js/web";
 import { appendHeader } from "vinxi/server";
