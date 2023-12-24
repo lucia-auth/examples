@@ -46,7 +46,7 @@ export async function GET(context: APIContext): Promise<Response> {
 		context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 		return context.redirect("/");
 	} catch (e) {
-		if (e instanceof OAuth2RequestError && e.name === "invalid_grant") {
+		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
 			return new Response(null, {
 				status: 400

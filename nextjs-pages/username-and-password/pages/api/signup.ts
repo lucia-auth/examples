@@ -43,6 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			.appendHeader("Set-Cookie", lucia.createSessionCookie(session.id).serialize())
 			.status(200)
 			.end();
+		return;
 	} catch (e) {
 		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			res.status(400).json({

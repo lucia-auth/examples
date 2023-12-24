@@ -1,18 +1,13 @@
-import { github, lucia } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { cookies } from "next/headers";
 import { OAuth2RequestError } from "arctic";
 import { generateId } from "lucia";
 
-import type { DatabaseUser } from "@/lib/db";
-
-export async function GET(request: Request): Promise<Response> {
-	const url = new URL(request.url);
-	const code = url.searchParams.get("code");
-	const state = url.searchParams.get("state");
-	const storedState = cookies().get("github_oauth_state")?.value ?? null;
+export default defineEventHandler(async (event) => {
+	const query = getQuery(event);
+	const code = query.code?.toString() ?? null;
+	const state = query.state?.toString() ?? null;
+	const storedState = getCookie(event, "github_oauth_state") ?? null;
 	if (!code || !state || !storedState || state !== storedState) {
-		return new Response(null, {
+		throw createError({
 			status: 400
 		});
 	}
@@ -31,14 +26,8 @@ export async function GET(request: Request): Promise<Response> {
 
 		if (existingUser) {
 			const session = await lucia.createSession(existingUser.id, {});
-			const sessionCookie = lucia.createSessionCookie(session.id);
-			cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
-			return new Response(null, {
-				status: 302,
-				headers: {
-					Location: "/"
-				}
-			});
+			appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+			return sendRedirect(event, "/");
 		}
 
 		const userId = generateId(15);
@@ -48,26 +37,20 @@ export async function GET(request: Request): Promise<Response> {
 			githubUser.login
 		);
 		const session = await lucia.createSession(userId, {});
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
-		return new Response(null, {
-			status: 302,
-			headers: {
-				Location: "/"
-			}
-		});
+		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+		return sendRedirect(event, "/");
 	} catch (e) {
 		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
-			return new Response(null, {
+			throw createError({
 				status: 400
 			});
 		}
-		return new Response(null, {
+		throw createError({
 			status: 500
 		});
 	}
-}
+});
 
 interface GitHubUser {
 	id: string;

@@ -2,12 +2,12 @@ import { Lucia } from "lucia";
 import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { db } from "./db";
 import { GitHub } from "arctic";
-import { webcrypto } from "crypto";
 
 import type { Session, User } from "lucia";
 import type { IncomingMessage, ServerResponse } from "http";
 
-globalThis.crypto = webcrypto as Crypto;
+// import { webcrypto } from "crypto";
+// globalThis.crypto = webcrypto as Crypto;
 
 const adapter = new BetterSqlite3Adapter(db, {
 	user: "user",

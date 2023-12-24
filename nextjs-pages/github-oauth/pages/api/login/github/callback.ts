@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			.appendHeader("Set-Cookie", lucia.createSessionCookie(session.id).serialize())
 			.redirect("/");
 	} catch (e) {
-		if (e instanceof OAuth2RequestError && e.name === "invalid_grant") {
+		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
 			res.status(400).end();
 			return;

@@ -12,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		res.status(401).end();
 		return;
 	}
+	await lucia.invalidateSession(session.id);
 	return res
 		.setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize())
 		.status(200)
