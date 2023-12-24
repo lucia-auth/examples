@@ -20,10 +20,10 @@ export default defineEventHandler(async (event) => {
 
 	const { session, user } = await lucia.validateSession(sessionId);
 	if (session && session.fresh) {
-		appendResponseHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
 	}
 	if (!session) {
-		appendResponseHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
+		appendHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
 	}
 	event.context.session = session;
 	event.context.user = user;
