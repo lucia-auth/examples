@@ -6,12 +6,22 @@ export const useUser = () => {
 };
 
 export const useAuthenticatedUser = () => {
-	const user = useUser();
-	return computed(() => {
-		const userValue = unref(user);
-		if (!userValue) {
-			throw createError("useAuthenticatedUser() can only be used in protected pages");
+	const authenticatedUser = useUser()
+
+	if (!authenticatedUser.value) {
+		throw createError("useAuthenticatedUser() can only be used in protected pages");
+	}
+	
+	let user = ref(toRaw(authenticatedUser.value))
+	
+	watch(authenticatedUser, async (authenticatedUser) => {
+		if (!authenticatedUser) {
+			await navigateTo('/login')
+			return
 		}
-		return userValue;
-	});
+
+		user.value = authenticatedUser;
+	})
+	
+	return user
 };
