@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	if (cookie) {
-		setCookie(event, cookie.name, cookie.value, cookie.attributes);
+		setLuciaCookie(event, cookie);
 	}
 
 	event.context.session = session;

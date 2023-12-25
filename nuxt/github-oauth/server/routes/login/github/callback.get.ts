@@ -39,8 +39,7 @@ export default defineEventHandler(async (event) => {
 		}
 
 		const session = await lucia.createSession(user.id, {});
-		const cookie = lucia.createSessionCookie(session.id);
-		setCookie(event, cookie.name, cookie.value, cookie.attributes);
+		setLuciaCookie(event, lucia.createSessionCookie(session.id));
 		return sendRedirect(event, "/");
 	} catch (e) {
 		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
