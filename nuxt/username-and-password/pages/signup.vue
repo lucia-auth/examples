@@ -2,10 +2,9 @@
 const error = ref<string | null>(null);
 
 async function signup(e: Event) {
-	if (!(e.target instanceof HTMLFormElement)) return;
 	const result = await useFetch("/api/signup", {
 		method: "POST",
-		body: new FormData(e.target)
+		body: new FormData(e.target as HTMLFormElement)
 	});
 	if (result.error.value) {
 		error.value = result.error.value.data?.message ?? null;

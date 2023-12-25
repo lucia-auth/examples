@@ -8,9 +8,6 @@ export default defineNuxtRouteMiddleware(async () => {
 	// and nitro's own `$fetch` will will inherit headers from current event
 	// and so cookies as well
 	const fetch = useRequestFetch();
-	const data = await fetch('/api/user')
-		.catch(() => {
-			throw createError("Failed to fetch data")
-		})
-	user.value = data.user ?? null;
+
+	user.value = await fetch("/api/user");
 });
