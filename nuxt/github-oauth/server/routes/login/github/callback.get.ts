@@ -14,30 +14,33 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		const tokens = await github.validateAuthorizationCode(code);
-		const githubUserResponse = await fetch("https://api.github.com/user", {
+		const githubUser = await $fetch<GitHubUser>("https://api.github.com/user", {
 			headers: {
 				Authorization: `Bearer ${tokens.accessToken}`
 			}
 		});
-		const githubUser: GitHubUser = await githubUserResponse.json();
-		const existingUser = db.prepare("SELECT * FROM user WHERE github_id = ?").get(githubUser.id) as
+		let user = db.prepare("SELECT * FROM user WHERE github_id = ?").get(githubUser.id) as
 			| DatabaseUser
 			| undefined;
 
-		if (existingUser) {
-			const session = await lucia.createSession(existingUser.id, {});
-			appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
-			return sendRedirect(event, "/");
+		if (!user) {
+			const userId = generateId(15);
+			db.prepare("INSERT INTO user (id, github_id, username) VALUES (?, ?, ?)").run(
+				userId,
+				githubUser.id,
+				githubUser.login
+			);
+
+			user = {
+				id: userId,
+				username: githubUser.login,
+				github_id: Number(githubUser.id),
+			};
 		}
 
-		const userId = generateId(15);
-		db.prepare("INSERT INTO user (id, github_id, username) VALUES (?, ?, ?)").run(
-			userId,
-			githubUser.id,
-			githubUser.login
-		);
-		const session = await lucia.createSession(userId, {});
-		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+		const session = await lucia.createSession(user.id, {});
+		const cookie = lucia.createSessionCookie(session.id);
+		setCookie(event, cookie.name, cookie.value, cookie.attributes);
 		return sendRedirect(event, "/");
 	} catch (e) {
 		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
