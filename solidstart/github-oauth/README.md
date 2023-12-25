@@ -1,4 +1,4 @@
-# GitHub OAuth example in Next.js App router
+# GitHub OAuth example in SolidStart
 
 Uses SQLite (`main.db`) database.
 
@@ -24,7 +24,3 @@ If you're using Node 16 or 18, uncomment the code in `lib/auth.ts`. This is not 
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
 ```
-
-## Known issues
-
-- "Sign in with GitHub" link is broken due to client side routing

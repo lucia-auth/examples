@@ -8,7 +8,6 @@ export default function Index() {
 	const user = createAsync(getAuthenticatedUser);
 	return (
 		<>
-			<p>Hi</p>
 			<h1>Hi, {user()?.username}!</h1>
 			<p>Your user ID is {user()?.id}.</p>
 			<form method="post" action={logout}>
