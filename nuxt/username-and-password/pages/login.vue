@@ -1,16 +1,17 @@
 <script lang="ts" setup>
 const error = ref<string | null>(null);
 
-async function login(e: Event) {
-	const result = await useFetch("/api/login", {
+function login(e: Event) {
+	$fetch("/api/login", {
 		method: "POST",
 		body: new FormData(e.target as HTMLFormElement)
-	});
-	if (result.error.value) {
-		error.value = result.error.value.data?.message ?? null;
-	} else {
-		await navigateTo("/");
-	}
+	})
+		.then(async () => {
+			await navigateTo("/")
+		})
+		.catch((e) => {
+			error.value = e.data?.message ?? null
+		})
 }
 </script>
 

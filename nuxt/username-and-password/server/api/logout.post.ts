@@ -5,5 +5,6 @@ export default eventHandler(async (event) => {
 		});
 	}
 	await lucia.invalidateSession(event.context.session.id);
-	appendHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
+	const cookie = lucia.createBlankSessionCookie();
+	setCookie(event, cookie.name, cookie.value, cookie.attributes);
 });

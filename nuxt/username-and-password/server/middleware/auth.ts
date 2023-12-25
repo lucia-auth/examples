@@ -1,13 +1,15 @@
-import { verifyRequestOrigin } from "lucia";
+import { verifyRequestOrigin, type Cookie } from "lucia";
 
 import type { User, Session } from "lucia";
 
 export default defineEventHandler(async (event) => {
-	if (event.node.req.method !== "GET") {
+	if (!isMethod(event, 'GET')) {
 		const originHeader = getHeader(event, "Origin") ?? null;
 		const hostHeader = getHeader(event, "Host") ?? null;
 		if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
-			return event.node.res.writeHead(403).end();
+			setResponseStatus(event, 403);
+
+			return;
 		}
 	}
 
@@ -19,12 +21,18 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const { session, user } = await lucia.validateSession(sessionId);
-	if (session && session.fresh) {
-		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
-	}
+	let cookie: Cookie | undefined
+
 	if (!session) {
-		appendHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
+		cookie = lucia.createBlankSessionCookie();
+	} else if (session.fresh) {
+		cookie = lucia.createSessionCookie(session.id);
 	}
+	
+	if (cookie) {
+		setCookie(event, cookie.name, cookie.value, cookie.attributes);
+	}
+	
 	event.context.session = session;
 	event.context.user = user;
 });

@@ -35,7 +35,8 @@ export default eventHandler(async (event) => {
 			hashedPassword
 		);
 		const session = await lucia.createSession(userId, {});
-		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+		const cookie = lucia.createSessionCookie(session.id);
+		setCookie(event, cookie.name, cookie.value, cookie.attributes);
 	} catch (e) {
 		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			throw createError({

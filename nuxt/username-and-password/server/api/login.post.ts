@@ -1,7 +1,4 @@
 import { Argon2id } from "oslo/password";
-import { db } from "../utils/db";
-
-import type { DatabaseUser } from "../utils/db";
 
 export default eventHandler(async (event) => {
 	const formData = await readFormData(event);
@@ -44,5 +41,6 @@ export default eventHandler(async (event) => {
 	}
 
 	const session = await lucia.createSession(existingUser.id, {});
-	appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+	const cookie = lucia.createSessionCookie(session.id);
+	setCookie(event, cookie.name, cookie.value, cookie.attributes);
 });
