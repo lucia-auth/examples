@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware(async () => {
 	// client headers for local request (nitro side), so the middleware
 	// wont see session cookie even though it was there, but not sent.
 	// `useRequestFetch` fixes it by using normal `$fetch` on client side
-	// and nitro's own `$fetch` will will inherit headers from current event
+	// and nitro's own `$fetch` which will inherit headers from current event
 	// and so cookies as well
 	const fetch = useRequestFetch();
 
