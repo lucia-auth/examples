@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
+import type { FormEvent } from "react";
 import type { GetServerSidePropsResult, GetServerSidePropsContext } from "next";
 
 export async function getServerSideProps(
@@ -25,30 +26,29 @@ export async function getServerSideProps(
 export default function Page() {
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
+
+	async function onSubmit(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setError(null);
+		const formElement = e.target as HTMLFormElement;
+		const response = await fetch(formElement.action, {
+			method: formElement.method,
+			body: JSON.stringify(Object.fromEntries(new FormData(formElement).entries())),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+		if (response.ok) {
+			router.push("/");
+		} else {
+			setError((await response.json()).error);
+		}
+	}
+
 	return (
 		<>
 			<h1>Create an account</h1>
-			<form
-				method="post"
-				action="/api/signup"
-				onSubmit={async (e) => {
-					e.preventDefault();
-					setError(null);
-					const formElement = e.target as HTMLFormElement;
-					const response = await fetch(formElement.action, {
-						method: formElement.method,
-						body: JSON.stringify(Object.fromEntries(new FormData(formElement).entries())),
-						headers: {
-							"Content-Type": "application/json"
-						}
-					});
-					if (response.ok) {
-						router.push("/");
-					} else {
-						setError((await response.json()).error);
-					}
-				}}
-			>
+			<form method="post" action="/api/signup" onSubmit={onSubmit}>
 				<label htmlFor="username">Username</label>
 				<input name="username" id="username" />
 				<br />

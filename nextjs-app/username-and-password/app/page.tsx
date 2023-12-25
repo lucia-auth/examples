@@ -11,13 +11,13 @@ export default async function Page() {
 		return redirect("/login");
 	}
 	return (
-		<p>
+		<>
 			<h1>Hi, {user.username}!</h1>
 			<p>Your user ID is {user.id}.</p>
 			<Form action={logout}>
 				<button>Sign out</button>
 			</Form>
-		</p>
+		</>
 	);
 }
 

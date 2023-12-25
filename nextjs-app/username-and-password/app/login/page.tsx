@@ -71,6 +71,5 @@ async function login(_: any, formData: FormData): Promise<ActionResult> {
 	const session = await lucia.createSession(existingUser.id, {});
 	const sessionCookie = lucia.createSessionCookie(session.id);
 	cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
-
-	redirect("/");
+	return redirect("/");
 }
