@@ -2,7 +2,7 @@ import { action, redirect, useSubmission } from "@solidjs/router";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 import { Show, getRequestEvent } from "solid-js/web";
-import { appendHeader } from "vinxi/server";
+import { appendHeader } from "@solidjs/start/server";
 import { lucia } from "~/lib/auth";
 import { db } from "~/lib/db";
 import { SqliteError } from "better-sqlite3";
