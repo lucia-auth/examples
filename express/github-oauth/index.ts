@@ -13,14 +13,14 @@ const app = express();
 app.use(express.urlencoded());
 
 app.use((req, res, next) => {
-	if (req.method !== "GET") {
-		const originHeader = req.headers.origin ?? null;
-		const hostHeader = req.headers.host ?? null;
-		if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
-			return res.status(403).end();
-		}
+	if (req.method === "GET") {
+		return next();
 	}
-	return next();
+	const originHeader = req.headers.origin ?? null;
+	const hostHeader = req.headers.host ?? null;
+	if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
+		return res.status(403).end();
+	}
 });
 
 app.use(async (req, res, next) => {
