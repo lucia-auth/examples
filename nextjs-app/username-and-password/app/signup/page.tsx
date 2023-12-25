@@ -75,7 +75,7 @@ async function signup(_: any, formData: FormData): Promise<ActionResult> {
 			};
 		}
 		return {
-			error: "Unknown error"
+			error: "An unknown error occurred"
 		};
 	}
 	redirect("/");

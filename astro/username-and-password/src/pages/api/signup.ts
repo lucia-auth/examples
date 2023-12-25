@@ -66,7 +66,7 @@ export async function POST(context: APIContext): Promise<Response> {
 		}
 		return new Response(
 			JSON.stringify({
-				error: "Unknown error"
+				error: "An unknown error occurred"
 			}),
 			{
 				status: 500

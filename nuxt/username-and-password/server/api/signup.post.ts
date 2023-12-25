@@ -44,7 +44,7 @@ export default eventHandler(async (event) => {
 			});
 		}
 		throw createError({
-			message: "Unknown error",
+			message: "An unknown error occurred",
 			statusCode: 500
 		});
 	}
