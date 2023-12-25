@@ -12,7 +12,7 @@ export const useAuthenticatedUser = () => {
 		throw createError("useAuthenticatedUser() can only be used in protected pages");
 	}
 	
-	let user = ref(toRaw(authenticatedUser.value))
+	const user = ref(toRaw(authenticatedUser.value))
 	
 	watch(authenticatedUser, async (authenticatedUser) => {
 		if (!authenticatedUser) {
