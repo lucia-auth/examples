@@ -1,5 +1,4 @@
 import { Argon2id } from "oslo/password";
-import { db } from "../utils/db";
 import { generateId } from "lucia";
 import { SqliteError } from "better-sqlite3";
 
@@ -35,8 +34,7 @@ export default eventHandler(async (event) => {
 			hashedPassword
 		);
 		const session = await lucia.createSession(userId, {});
-		const cookie = lucia.createSessionCookie(session.id);
-		setCookie(event, cookie.name, cookie.value, cookie.attributes);
+		setLuciaCookie(event, lucia.createSessionCookie(session.id));
 	} catch (e) {
 		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			throw createError({

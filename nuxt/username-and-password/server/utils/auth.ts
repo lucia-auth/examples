@@ -1,6 +1,7 @@
-import { Lucia } from "lucia";
+import { Lucia, type Cookie } from "lucia";
 import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { db } from "./db";
+import type { H3Event } from "h3";
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
 
@@ -21,6 +22,10 @@ export const lucia = new Lucia(adapter, {
 		};
 	}
 });
+
+export function setLuciaCookie(event: H3Event, cookie: Cookie) {
+	setCookie(event, cookie.name, cookie.value, cookie.attributes);
+}
 
 declare module "lucia" {
 	interface Register {
