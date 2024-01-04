@@ -1,14 +1,10 @@
-import "./globals.css";
+import type { Metadata } from "next";
 
-export const metadata = {
-	title: "GitHub OAuth with Lucia"
+export const metadata: Metadata = {
+	title: "Lucia example"
 };
 
-export default function RootLayout({
-	children
-}: {
-	children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en">
 			<body>{children}</body>

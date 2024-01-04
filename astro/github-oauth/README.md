@@ -1,27 +1,17 @@
-# GitHub OAuth example with Lucia and Astro
+# GitHub OAuth example in Astro
 
-This example uses SQLite3 with `better-sqlite3`. Make sure to setup your `.env` file.
+Uses SQLite (in-memory) database.
 
-```bash
-# install dependencies
+```
 pnpm i
-
-# run dev server
 pnpm dev
 ```
 
-## Setup GitHub OAuth
+## Setup
 
-[Create a new GitHub OAuth app](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app). The redirect uri should be set to `localhost:5173/login/github/callback`. Copy and paste the client id and secret into `.env`.
+Create a GitHub OAuth app with the callback set to `http://localhost:4321/login/github/callback` and create an `.env` file.
 
 ```bash
 GITHUB_CLIENT_ID=""
 GITHUB_CLIENT_SECRET=""
 ```
-
-## User schema
-
-| id         | type     | unique |
-| ---------- | -------- | :----: |
-| `id`       | `string` |        |
-| `username` | `string` |        |

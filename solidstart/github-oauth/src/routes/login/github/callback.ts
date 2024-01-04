@@ -1,63 +1,69 @@
-import { auth, githubAuth } from "~/auth/lucia";
-import { OAuthRequestError } from "@lucia-auth/oauth";
-import { parseCookie, redirect } from "solid-start";
+import {
+	getQuery,
+	createError,
+	getCookie,
+	appendHeader,
+	sendRedirect
+} from "@solidjs/start/server";
+import { OAuth2RequestError } from "arctic";
+import { generateId } from "lucia";
+import { github, lucia } from "~/lib/auth";
+import { db } from "~/lib/db";
 
-import type { APIEvent } from "solid-start";
+import type { APIEvent } from "@solidjs/start/server";
+import type { DatabaseUser } from "~/lib/db";
 
-export const GET = async (event: APIEvent) => {
-	const authRequest = auth.handleRequest(event.request);
-	const session = await authRequest.validate();
-	if (session) {
-		return redirect("/", 302); // redirect to profile page
-	}
-	const cookies = parseCookie(event.request.headers.get("Cookie") ?? "");
-	const storedState = cookies.github_oauth_state;
-	const url = new URL(event.request.url);
-	const state = url.searchParams.get("state");
-	const code = url.searchParams.get("code");
-	// validate state
-	if (!storedState || !state || storedState !== state || !code) {
-		return new Response(null, {
+export async function GET(event: APIEvent) {
+	const query = getQuery(event);
+	const code = query.code?.toString() ?? null;
+	const state = query.state?.toString() ?? null;
+	const storedState = getCookie(event, "github_oauth_state") ?? null;
+	if (!code || !state || !storedState || state !== storedState) {
+		throw createError({
 			status: 400
 		});
 	}
+
 	try {
-		const { getExistingUser, githubUser, createUser } =
-			await githubAuth.validateCallback(code);
-
-		const getUser = async () => {
-			const existingUser = await getExistingUser();
-			if (existingUser) return existingUser;
-			const user = await createUser({
-				attributes: {
-					username: githubUser.login
-				}
-			});
-			return user;
-		};
-
-		const user = await getUser();
-		const session = await auth.createSession({
-			userId: user.userId,
-			attributes: {}
-		});
-		const sessionCookie = auth.createSessionCookie(session);
-		return new Response(null, {
-			status: 302,
+		const tokens = await github.validateAuthorizationCode(code);
+		const githubUserResponse = await fetch("https://api.github.com/user", {
 			headers: {
-				Location: "/",
-				"Set-Cookie": sessionCookie.serialize()
+				Authorization: `Bearer ${tokens.accessToken}`
 			}
 		});
+		const githubUser: GitHubUser = await githubUserResponse.json();
+		const existingUser = db.prepare("SELECT * FROM user WHERE github_id = ?").get(githubUser.id) as
+			| DatabaseUser
+			| undefined;
+
+		if (existingUser) {
+			const session = await lucia.createSession(existingUser.id, {});
+			appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+			return sendRedirect(event, "/");
+		}
+
+		const userId = generateId(15);
+		db.prepare("INSERT INTO user (id, github_id, username) VALUES (?, ?, ?)").run(
+			userId,
+			githubUser.id,
+			githubUser.login
+		);
+		const session = await lucia.createSession(userId, {});
+		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+		return sendRedirect(event, "/");
 	} catch (e) {
-		if (e instanceof OAuthRequestError) {
+		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
-			return new Response(null, {
+			throw createError({
 				status: 400
 			});
 		}
-		return new Response(null, {
+		throw createError({
 			status: 500
 		});
 	}
-};
+}
+interface GitHubUser {
+	id: string;
+	login: string;
+}

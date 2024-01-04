@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-
-	import type { PageData } from './$types';
+	import { enhance } from "$app/forms";
+	import type { PageData } from "./$types";
 
 	export let data: PageData;
 </script>
 
-<h1>Profile</h1>
-<p>User id: {data.userId}</p>
-<p>Username: {data.username}</p>
-<form method="post" action="?/logout" use:enhance>
-	<input type="submit" value="Sign out" />
+<h1>Hi, {data.user.username}!</h1>
+<p>Your user ID is {data.user.id}.</p>
+<form method="post" use:enhance>
+	<button>Sign out</button>
 </form>

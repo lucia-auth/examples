@@ -1,97 +1,66 @@
-import { Show } from "solid-js";
-import { auth } from "~/auth/lucia";
-import { A } from "solid-start";
-import { ServerError } from "solid-start/server";
+import { action, redirect, useSubmission } from "@solidjs/router";
+import { generateId } from "lucia";
+import { Argon2id } from "oslo/password";
+import { Show, getRequestEvent } from "solid-js/web";
+import { appendHeader } from "@solidjs/start/server";
+import { lucia } from "~/lib/auth";
+import { db } from "~/lib/db";
 import { SqliteError } from "better-sqlite3";
 
-import {
-	createServerAction$,
-	createServerData$,
-	redirect
-} from "solid-start/server";
-
-export const routeData = () => {
-	return createServerData$(async (_, event) => {
-		const authRequest = auth.handleRequest(event.request);
-		const session = await authRequest.validate();
-		if (session) {
-			return redirect("/");
-		}
-	});
-};
-
-const Page = () => {
-	const [enrolling, { Form }] = createServerAction$(
-		async (formData: FormData) => {
-			const username = formData.get("username");
-			const password = formData.get("password");
-			if (
-				typeof username !== "string" ||
-				username.length < 4 ||
-				username.length > 31
-			) {
-				throw new ServerError("Invalid username");
-			}
-			if (
-				typeof password !== "string" ||
-				password.length < 6 ||
-				password.length > 255
-			) {
-				throw new ServerError("Invalid password");
-			}
-			try {
-				const user = await auth.createUser({
-					key: {
-						providerId: "username", // auth method
-						providerUserId: username.toLowerCase(), // unique id when using "username" auth method
-						password // hashed by Lucia
-					},
-					attributes: {
-						username
-					}
-				});
-				const session = await auth.createSession({
-					userId: user.userId,
-					attributes: {}
-				});
-				const sessionCookie = auth.createSessionCookie(session);
-				// set cookie and redirect
-				return new Response(null, {
-					status: 302,
-					headers: {
-						Location: "/",
-						"Set-Cookie": sessionCookie.serialize()
-					}
-				});
-			} catch (e) {
-				// check for unique constraint error in user table
-				if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
-					throw new ServerError("Username already taken");
-				}
-				throw new ServerError("An unknown error occurred", {
-					status: 500
-				});
-			}
-		}
-	);
+export default function Index() {
+	const submission = useSubmission(signup);
 	return (
 		<>
-			<h1>Sign up</h1>
-			<Form>
+			<h1>Create an account</h1>
+			<form method="post" action={signup}>
 				<label for="username">Username</label>
 				<input name="username" id="username" />
 				<br />
 				<label for="password">Password</label>
 				<input type="password" name="password" id="password" />
 				<br />
-				<input type="submit" />
-			</Form>
-			<Show when={enrolling.error}>
-				<p class="error">{enrolling.error.message}</p>;
-			</Show>
-			<A href="/login">Sign in</A>
+				<button>Continue</button>
+				<Show when={submission.result}>{(result) => <p>{result().message}</p>}</Show>
+			</form>
+			<a href="/login">Sign in</a>
 		</>
 	);
-};
+}
 
-export default Page;
+const signup = action(async (formData: FormData) => {
+	"use server";
+	const username = formData.get("username");
+	if (
+		typeof username !== "string" ||
+		username.length < 3 ||
+		username.length > 31 ||
+		!/^[a-z0-9_-]+$/.test(username)
+	) {
+		return new Error("Invalid username");
+	}
+	const password = formData.get("password");
+	if (typeof password !== "string" || password.length < 6 || password.length > 255) {
+		return new Error("Invalid password");
+	}
+
+	const hashedPassword = await new Argon2id().hash(password);
+	const userId = generateId(15);
+
+	try {
+		db.prepare("INSERT INTO user (id, username, password) VALUES(?, ?, ?)").run(
+			userId,
+			username,
+			hashedPassword
+		);
+
+		const session = await lucia.createSession(userId, {});
+		const event = getRequestEvent()!;
+		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+	} catch (e) {
+		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
+			return new Error("Username already used");
+		}
+		return new Error("An unknown error occurred");
+	}
+	throw redirect("/");
+});

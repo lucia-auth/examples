@@ -1,55 +1,55 @@
-import { auth, githubAuth } from "@/auth/lucia";
-import { OAuthRequestError } from "@lucia-auth/oauth";
-import { cookies, headers } from "next/headers";
+import { github, lucia } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { cookies } from "next/headers";
+import { OAuth2RequestError } from "arctic";
+import { generateId } from "lucia";
 
-import type { NextRequest } from "next/server";
+import type { DatabaseUser } from "@/lib/db";
 
-export const GET = async (request: NextRequest) => {
-	const authRequest = auth.handleRequest(request.method, {
-		headers,
-		cookies
-	});
-	const session = await authRequest.validate();
-	if (session) {
-		return new Response(null, {
-			status: 302,
-			headers: {
-				Location: "/"
-			}
-		});
-	}
-	const cookieStore = cookies();
-	const storedState = cookieStore.get("github_oauth_state")?.value;
+export async function GET(request: Request): Promise<Response> {
 	const url = new URL(request.url);
-	const state = url.searchParams.get("state");
 	const code = url.searchParams.get("code");
-	// validate state
-	if (!storedState || !state || storedState !== state || !code) {
+	const state = url.searchParams.get("state");
+	const storedState = cookies().get("github_oauth_state")?.value ?? null;
+	if (!code || !state || !storedState || state !== storedState) {
 		return new Response(null, {
 			status: 400
 		});
 	}
-	try {
-		const { getExistingUser, githubUser, createUser } =
-			await githubAuth.validateCallback(code);
 
-		const getUser = async () => {
-			const existingUser = await getExistingUser();
-			if (existingUser) return existingUser;
-			const user = await createUser({
-				attributes: {
-					username: githubUser.login
+	try {
+		const tokens = await github.validateAuthorizationCode(code);
+		const githubUserResponse = await fetch("https://api.github.com/user", {
+			headers: {
+				Authorization: `Bearer ${tokens.accessToken}`
+			}
+		});
+		const githubUser: GitHubUser = await githubUserResponse.json();
+		const existingUser = db.prepare("SELECT * FROM user WHERE github_id = ?").get(githubUser.id) as
+			| DatabaseUser
+			| undefined;
+
+		if (existingUser) {
+			const session = await lucia.createSession(existingUser.id, {});
+			const sessionCookie = lucia.createSessionCookie(session.id);
+			cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+			return new Response(null, {
+				status: 302,
+				headers: {
+					Location: "/"
 				}
 			});
-			return user;
-		};
+		}
 
-		const user = await getUser();
-		const session = await auth.createSession({
-			userId: user.userId,
-			attributes: {}
-		});
-		authRequest.setSession(session);
+		const userId = generateId(15);
+		db.prepare("INSERT INTO user (id, github_id, username) VALUES (?, ?, ?)").run(
+			userId,
+			githubUser.id,
+			githubUser.login
+		);
+		const session = await lucia.createSession(userId, {});
+		const sessionCookie = lucia.createSessionCookie(session.id);
+		cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
 		return new Response(null, {
 			status: 302,
 			headers: {
@@ -57,7 +57,7 @@ export const GET = async (request: NextRequest) => {
 			}
 		});
 	} catch (e) {
-		if (e instanceof OAuthRequestError) {
+		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
 			return new Response(null, {
 				status: 400
@@ -67,4 +67,9 @@ export const GET = async (request: NextRequest) => {
 			status: 500
 		});
 	}
-};
+}
+
+interface GitHubUser {
+	id: string;
+	login: string;
+}

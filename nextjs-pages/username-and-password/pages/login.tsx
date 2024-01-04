@@ -1,79 +1,64 @@
-import { useRouter } from "next/router";
-import { auth } from "@/auth/lucia";
-import { useState } from "react";
-
+import { validateRequest } from "@/lib/auth";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/router";
 
-import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { FormEvent } from "react";
+import type { GetServerSidePropsResult, GetServerSidePropsContext } from "next";
 
-export const getServerSideProps = async (
+export async function getServerSideProps(
 	context: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<{}>> => {
-	const authRequest = auth.handleRequest(context);
-	const session = await authRequest.validate();
-	if (session) {
+): Promise<GetServerSidePropsResult<{}>> {
+	const { user } = await validateRequest(context.req, context.res);
+	if (user) {
 		return {
 			redirect: {
-				destination: "/",
-				permanent: false
+				permanent: false,
+				destination: "/"
 			}
 		};
 	}
 	return {
 		props: {}
 	};
-};
+}
 
-const Page = () => {
+export default function Page() {
 	const router = useRouter();
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [error, setError] = useState<string | null>(null);
+
+	async function onSubmit(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setError(null);
+		const formElement = e.target as HTMLFormElement;
+		const response = await fetch(formElement.action, {
+			method: formElement.method,
+			body: JSON.stringify(Object.fromEntries(new FormData(formElement).entries())),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+		if (response.ok) {
+			router.push("/");
+		} else {
+			setError((await response.json()).error);
+		}
+	}
+
 	return (
 		<>
 			<h1>Sign in</h1>
-			<form
-				method="post"
-				action="/api/login"
-				onSubmit={async (e) => {
-					e.preventDefault();
-					setErrorMessage(null);
-					const formData = new FormData(e.currentTarget);
-					const response = await fetch("/api/login", {
-						method: "POST",
-						body: JSON.stringify({
-							username: formData.get("username"),
-							password: formData.get("password")
-						}),
-						headers: {
-							"Content-Type": "application/json"
-						},
-						redirect: "manual"
-					});
-
-					if (response.status === 0) {
-						// redirected
-						// when using `redirect: "manual"`, response status 0 is returned
-						return router.push("/");
-					}
-					if (!response.ok) {
-						const result = (await response.json()) as {
-							error?: string;
-						};
-						setErrorMessage(result?.error ?? null);
-					}
-				}}
-			>
+			<form method="post" action="/api/login" onSubmit={onSubmit}>
 				<label htmlFor="username">Username</label>
 				<input name="username" id="username" />
 				<br />
 				<label htmlFor="password">Password</label>
 				<input type="password" name="password" id="password" />
 				<br />
-				<input type="submit" />
+				<button>Continue</button>
+				<p>{error}</p>
 			</form>
-			{errorMessage && <p className="error">{errorMessage}</p>}
 			<Link href="/signup">Create an account</Link>
 		</>
 	);
-};
-
-export default Page;
+}

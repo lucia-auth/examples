@@ -1,55 +1,46 @@
+import { Argon2id } from "oslo/password";
+import { db } from "../utils/db";
+import { generateId } from "lucia";
 import { SqliteError } from "better-sqlite3";
 
-export default defineEventHandler(async (event) => {
-	const { username, password } = await readBody<{
-		username: unknown;
-		password: unknown;
-	}>(event);
-	// basic check
+export default eventHandler(async (event) => {
+	const formData = await readFormData(event);
+	const username = formData.get("username");
 	if (
 		typeof username !== "string" ||
-		username.length < 4 ||
-		username.length > 31
+		username.length < 3 ||
+		username.length > 31 ||
+		!/^[a-z0-9_-]+$/.test(username)
 	) {
 		throw createError({
 			message: "Invalid username",
 			statusCode: 400
 		});
 	}
-	if (
-		typeof password !== "string" ||
-		password.length < 6 ||
-		password.length > 255
-	) {
+	const password = formData.get("password");
+	if (typeof password !== "string" || password.length < 6 || password.length > 255) {
 		throw createError({
 			message: "Invalid password",
 			statusCode: 400
 		});
 	}
+
+	const hashedPassword = await new Argon2id().hash(password);
+	const userId = generateId(15);
+
 	try {
-		const user = await auth.createUser({
-			key: {
-				providerId: "username", // auth method
-				providerUserId: username.toLowerCase(), // unique id when using "username" auth method
-				password // hashed by Lucia
-			},
-			attributes: {
-				username
-			}
-		});
-		const session = await auth.createSession({
-			userId: user.userId,
-			attributes: {}
-		});
-		const authRequest = auth.handleRequest(event);
-		authRequest.setSession(session);
-		return sendRedirect(event, "/"); // redirect to profile page
+		db.prepare("INSERT INTO user (id, username, password) VALUES(?, ?, ?)").run(
+			userId,
+			username,
+			hashedPassword
+		);
+		const session = await lucia.createSession(userId, {});
+		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
 	} catch (e) {
-		// check for unique constraint error in user table
 		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			throw createError({
-				message: "Username already taken",
-				statusCode: 400
+				message: "Username already used",
+				statusCode: 500
 			});
 		}
 		throw createError({

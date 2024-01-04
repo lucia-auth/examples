@@ -1,27 +1,20 @@
-import { dev } from '$app/environment';
-import { githubAuth } from '$lib/server/lucia.js';
+import { github } from "$lib/server/auth";
+import { generateState } from "arctic";
+import { redirect } from "@sveltejs/kit";
 
-export const GET = async ({ cookies, locals }) => {
-	const session = await locals.auth.validate();
-	if (session) {
-		return new Response(null, {
-			status: 302,
-			headers: {
-				Location: '/'
-			}
-		});
-	}
-	const [url, state] = await githubAuth.getAuthorizationUrl();
-	cookies.set('github_oauth_state', state, {
+import type { RequestEvent } from "@sveltejs/kit";
+
+export async function GET(event: RequestEvent): Promise<Response> {
+	const state = generateState();
+	const url = await github.createAuthorizationURL(state);
+
+	event.cookies.set("github_oauth_state", state, {
+		path: "/",
+		secure: import.meta.env.PROD,
 		httpOnly: true,
-		secure: !dev,
-		path: '/',
-		maxAge: 60 * 60
+		maxAge: 60 * 10,
+		sameSite: "lax"
 	});
-	return new Response(null, {
-		status: 302,
-		headers: {
-			Location: url.toString()
-		}
-	});
-};
+
+	return redirect(302, url.toString());
+}

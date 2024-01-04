@@ -1,32 +1,29 @@
-import { auth } from "@/auth/lucia";
+import { validateRequest } from "@/lib/auth";
 
-import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsResult, GetServerSidePropsContext } from "next";
 
-export const getServerSideProps = async (
+export async function getServerSideProps(
 	context: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<{}>> => {
-	const authRequest = auth.handleRequest(context);
-	const session = await authRequest.validate();
-	if (session) {
+): Promise<GetServerSidePropsResult<{}>> {
+	const { user } = await validateRequest(context.req, context.res);
+	if (user) {
 		return {
 			redirect: {
-				destination: "/",
-				permanent: false
+				permanent: false,
+				destination: "/"
 			}
 		};
 	}
 	return {
 		props: {}
 	};
-};
+}
 
-const Page = () => {
+export default function Page() {
 	return (
 		<>
 			<h1>Sign in</h1>
 			<a href="/api/login/github">Sign in with GitHub</a>
 		</>
 	);
-};
-
-export default Page;
+}

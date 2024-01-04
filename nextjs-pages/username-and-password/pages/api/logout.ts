@@ -1,20 +1,17 @@
-import { auth } from "@/auth/lucia";
+import { lucia, validateRequest } from "@/lib/auth";
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-	if (req.method !== "POST") return res.status(405);
-	const authRequest = auth.handleRequest({ req, res });
-	// check if user is authenticated
-	const session = await authRequest.validate();
-	if (!session) {
-		return res.status(401).send("Unauthorized");
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+	if (req.method !== "POST") {
+		res.status(404).end();
+		return;
 	}
-	// make sure to invalidate the current session!
-	await auth.invalidateSession(session.sessionId);
-	// delete session cookie
-	authRequest.setSession(null);
-	return res.redirect(302, "/login");
-};
-
-export default handler;
+	const { session } = await validateRequest(req, res);
+	if (!session) {
+		res.status(401).end();
+		return;
+	}
+	await lucia.invalidateSession(session.id);
+	res.setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize()).status(200).end();
+}

@@ -1,7 +1,7 @@
 {
-	"name": "github-oauth",
-	"description": "GitHub OAuth example with Lucia and Nuxt",
+	"name": "username-and-password",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"build": "nuxt build",
 		"dev": "nuxt dev",
@@ -11,13 +11,16 @@
 	},
 	"devDependencies": {
 		"@nuxt/devtools": "latest",
-		"@types/node": "^18",
-		"nuxt": "^3.6.1"
+		"@types/better-sqlite3": "^7.6.8",
+		"nuxt": "^3.8.2",
+		"vue": "^3.3.12",
+		"vue-router": "^4.2.5"
 	},
 	"dependencies": {
-		"@lucia-auth/adapter-sqlite": "latest",
-		"@lucia-auth/oauth": "latest",
-		"better-sqlite3": "^8.4.0",
-		"lucia": "latest"
+		"@lucia-auth/adapter-sqlite": "3.0.0-beta.12",
+		"arctic": "^0.10.2",
+		"better-sqlite3": "^9.2.2",
+		"lucia": "3.0.0-beta.14",
+		"oslo": "^0.27.0"
 	}
 }

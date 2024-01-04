@@ -1,26 +1,19 @@
-import { auth, githubAuth } from "~/auth/lucia";
-import { redirect } from "solid-start";
-import { serializeCookie } from "solid-start";
+import { sendRedirect, setCookie } from "@solidjs/start/server";
+import { generateState } from "arctic";
+import { github } from "~/lib/auth";
 
-import type { APIEvent } from "solid-start";
+import type { APIEvent } from "@solidjs/start/server";
 
-export const GET = async (event: APIEvent) => {
-	const authRequest = auth.handleRequest(event.request);
-	const session = await authRequest.validate();
-	if (session) {
-		return redirect("/", 302); // redirect to profile page
-	}
-	const [url, state] = await githubAuth.getAuthorizationUrl();
-	return new Response(null, {
-		status: 302,
-		headers: {
-			Location: url.toString(),
-			"Set-Cookie": serializeCookie("github_oauth_state", state, {
-				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				path: "/",
-				maxAge: 60 * 60
-			})
-		}
+export async function GET(event: APIEvent) {
+	const state = generateState();
+	const url = await github.createAuthorizationURL(state);
+
+	setCookie(event, "github_oauth_state", state, {
+		path: "/",
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		maxAge: 60 * 10,
+		sameSite: "lax"
 	});
-};
+	return sendRedirect(event, url.toString());
+}
