@@ -5,6 +5,7 @@ import { webcrypto } from "crypto";
 
 import type { Session, User } from "lucia";
 import type { IncomingMessage, ServerResponse } from "http";
+import type { DatabaseUser } from "./db";
 
 globalThis.crypto = webcrypto as Crypto;
 
@@ -29,9 +30,7 @@ export const lucia = new Lucia(adapter, {
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
-	}
-	interface DatabaseUserAttributes {
-		username: string;
+		DatabaseUserAttributes: Omit<DatabaseUser, "id">;
 	}
 }
 
