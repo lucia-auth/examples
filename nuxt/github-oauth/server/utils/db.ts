@@ -1,5 +1,6 @@
 import sqlite from "better-sqlite3";
 
+// This wont persist data in hmr updates
 export const db = sqlite(":memory:");
 
 db.exec(`CREATE TABLE IF NOT EXISTS user (
