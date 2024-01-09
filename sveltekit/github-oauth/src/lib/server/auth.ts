@@ -5,6 +5,8 @@ import { db } from "./db";
 import { GitHub } from "arctic";
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from "$env/static/private";
 
+import type { DatabaseUser } from "./db";
+
 const adapter = new BetterSqlite3Adapter(db, {
 	user: "user",
 	session: "session"
@@ -27,10 +29,7 @@ export const lucia = new Lucia(adapter, {
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
-	}
-	interface DatabaseUserAttributes {
-		username: string;
-		github_id: number;
+		DatabaseUserAttributes: Omit<DatabaseUser, "id">;
 	}
 }
 

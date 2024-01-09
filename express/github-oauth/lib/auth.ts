@@ -4,6 +4,8 @@ import { db } from "./db.js";
 import { GitHub } from "arctic";
 import dotenv from "dotenv";
 
+import type { DatabaseUser } from "./db.js";
+
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
 
@@ -33,9 +35,6 @@ export const github = new GitHub(process.env.GITHUB_CLIENT_ID!, process.env.GITH
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
-	}
-	interface DatabaseUserAttributes {
-		github_id: number;
-		username: string;
+		DatabaseUserAttributes: Omit<DatabaseUser, "id">;
 	}
 }

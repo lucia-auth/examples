@@ -3,6 +3,8 @@ import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { db } from "./db";
 import { GitHub } from "arctic";
 
+import type { DatabaseUser } from "./db";
+
 const adapter = new BetterSqlite3Adapter(db, {
 	user: "user",
 	session: "session"
@@ -25,10 +27,7 @@ export const lucia = new Lucia(adapter, {
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
-	}
-	interface DatabaseUserAttributes {
-		username: string;
-		github_id: number;
+		DatabaseUserAttributes: Omit<DatabaseUser, "id">;
 	}
 }
 

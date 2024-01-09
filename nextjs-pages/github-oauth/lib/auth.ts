@@ -5,6 +5,7 @@ import { GitHub } from "arctic";
 
 import type { Session, User } from "lucia";
 import type { IncomingMessage, ServerResponse } from "http";
+import type { DatabaseUser } from "./db";
 
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
@@ -54,9 +55,6 @@ export async function validateRequest(
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
-	}
-	interface DatabaseUserAttributes {
-		github_id: number;
-		username: string;
+		DatabaseUserAttributes: Omit<DatabaseUser, "id">;
 	}
 }
