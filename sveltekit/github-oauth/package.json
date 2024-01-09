@@ -22,10 +22,10 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@lucia-auth/adapter-sqlite": "3.0.0-beta.11",
+		"@lucia-auth/adapter-sqlite": "3.0.0-beta.12",
 		"arctic": "^0.10.2",
 		"better-sqlite3": "^9.2.2",
-		"lucia": "3.0.0-beta.13",
-		"oslo": "^0.25.1"
+		"lucia": "3.0.0-beta.14",
+		"oslo": "^0.27.0"
 	}
 }

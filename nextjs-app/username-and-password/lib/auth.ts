@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 
 import type { Session, User } from "lucia";
+import type { DatabaseUser } from "./db";
 
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
@@ -56,8 +57,6 @@ export const validateRequest = cache(
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
-	}
-	interface DatabaseUserAttributes {
-		username: string;
+		DatabaseUserAttributes: Omit<DatabaseUser, "id">;
 	}
 }

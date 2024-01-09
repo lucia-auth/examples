@@ -3,6 +3,9 @@ import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { db } from "./db";
 import { GitHub } from "arctic";
 import type { H3Event } from "h3";
+
+import type { DatabaseUser } from "./db";
+
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
 
@@ -32,10 +35,7 @@ export function setLuciaCookie(event: H3Event, cookie: Cookie) {
 declare module "lucia" {
 	interface Register {
 		Lucia: typeof lucia;
-	}
-	interface DatabaseUserAttributes {
-		username: string;
-		github_id: number;
+		DatabaseUserAttributes: Omit<DatabaseUser, "id">;
 	}
 }
 
