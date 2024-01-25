@@ -3,7 +3,7 @@ import { validateEmailVerificationToken } from "../../lib/token";
 
 import type { APIRoute } from "astro";
 
-export const get: APIRoute = async ({ params, locals }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
 	const { token } = params;
 	if (!token) {
 		return new Response(null, {
