@@ -1,18 +1,19 @@
-import { githubAuth } from "../../../lib/lucia";
+import { generateState } from "arctic";
+import { github } from "../../../lib/auth";
 
-import type { APIRoute } from "astro";
+import type { APIContext } from "astro";
 
-export const GET: APIRoute = async (context) => {
-	const session = await context.locals.auth.validate();
-	if (session) {
-		return context.redirect("/", 302); // redirect to profile page
-	}
-	const [url, state] = await githubAuth.getAuthorizationUrl();
+export async function GET(context: APIContext): Promise<Response> {
+	const state = generateState();
+	const url = await github.createAuthorizationURL(state);
+
 	context.cookies.set("github_oauth_state", state, {
-		httpOnly: true,
-		secure: !import.meta.env.DEV,
 		path: "/",
-		maxAge: 60 * 60
+		secure: import.meta.env.PROD,
+		httpOnly: true,
+		maxAge: 60 * 10,
+		sameSite: "lax"
 	});
-	return context.redirect(url.toString(), 302);
-};
+
+	return context.redirect(url.toString());
+}

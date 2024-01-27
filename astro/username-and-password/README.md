@@ -1,18 +1,8 @@
-# Username & password example with Lucia and Astro
+# Username and password example in Astro
 
-This example uses SQLite3 with `better-sqlite3`.
+Uses SQLite (in-memory) database.
 
-```bash
-# install dependencies
+```
 pnpm i
-
-# run dev server
 pnpm dev
 ```
-
-## User schema
-
-| id         | type     | unique |
-| ---------- | -------- | :----: |
-| `id`       | `string` |        |
-| `username` | `string` |   ✓    |

@@ -1,7 +1,10 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from "@sveltejs/kit";
 
-export const load = async ({ locals }) => {
-	const session = await locals.auth.validate();
-	if (session) throw redirect(302, '/');
+import type { PageServerLoad } from "./$types";
+
+export const load: PageServerLoad = async (event) => {
+	if (event.locals.user) {
+		return redirect(302, "/");
+	}
 	return {};
 };

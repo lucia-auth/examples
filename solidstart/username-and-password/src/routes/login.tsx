@@ -1,97 +1,62 @@
-import { auth } from "~/auth/lucia";
-import {
-	ServerError,
-	createServerAction$,
-	createServerData$,
-	redirect
-} from "solid-start/server";
-import { LuciaError } from "lucia";
-import { Show } from "solid-js";
-import { A } from "solid-start";
+import { action, redirect, useSubmission } from "@solidjs/router";
+import { Argon2id } from "oslo/password";
+import { Show, getRequestEvent } from "solid-js/web";
+import { appendHeader } from "@solidjs/start/server";
+import { lucia } from "~/lib/auth";
+import { db } from "~/lib/db";
 
-export const routeData = () => {
-	return createServerData$(async (_, event) => {
-		const authRequest = auth.handleRequest(event.request);
-		const session = await authRequest.validate();
-		if (session) {
-			return redirect("/");
-		}
-	});
-};
+import type { DatabaseUser } from "~/lib/db";
 
-const Page = () => {
-	const [enrolling, { Form }] = createServerAction$(
-		async (formData: FormData) => {
-			const username = formData.get("username");
-			const password = formData.get("password");
-			// basic check
-			if (
-				typeof username !== "string" ||
-				username.length < 1 ||
-				username.length > 31
-			) {
-				throw new ServerError("Invalid username");
-			}
-			if (
-				typeof password !== "string" ||
-				password.length < 1 ||
-				password.length > 255
-			) {
-				throw new ServerError("Invalid password");
-			}
-			try {
-				// find user by key
-				// and validate password
-				const key = await auth.useKey(
-					"username",
-					username.toLowerCase(),
-					password
-				);
-				const session = await auth.createSession({
-					userId: key.userId,
-					attributes: {}
-				});
-				const sessionCookie = auth.createSessionCookie(session);
-				// set cookie and redirect
-				return new Response(null, {
-					status: 302,
-					headers: {
-						Location: "/",
-						"Set-Cookie": sessionCookie.serialize()
-					}
-				});
-			} catch (e) {
-				if (
-					e instanceof LuciaError &&
-					(e.message === "AUTH_INVALID_KEY_ID" ||
-						e.message === "AUTH_INVALID_PASSWORD")
-				) {
-					// user does not exist
-					// or invalid password
-					throw new ServerError("Incorrect username or password");
-				}
-				throw new ServerError("An unknown error occurred");
-			}
-		}
-	);
+export default function Index() {
+	const submission = useSubmission(login);
 	return (
 		<>
 			<h1>Sign in</h1>
-			<Form>
+			<form method="post" action={login}>
 				<label for="username">Username</label>
 				<input name="username" id="username" />
 				<br />
 				<label for="password">Password</label>
 				<input type="password" name="password" id="password" />
 				<br />
-				<input type="submit" />
-			</Form>
-			<Show when={enrolling.error}>
-				<p class="error">{enrolling.error.message}</p>;
-			</Show>
-			<A href="/signup">Create an account</A>
+				<button>Continue</button>
+				<Show when={submission.result}>{(result) => <p>{result().message}</p>}</Show>
+			</form>
+			<a href="/signup">Create an account</a>
 		</>
 	);
-};
+}
 
-export default Page;
+const login = action(async (formData: FormData) => {
+	"use server";
+	const username = formData.get("username");
+	if (
+		typeof username !== "string" ||
+		username.length < 3 ||
+		username.length > 31 ||
+		!/^[a-z0-9_-]+$/.test(username)
+	) {
+		return new Error("Invalid username");
+	}
+	const password = formData.get("password");
+	if (typeof password !== "string" || password.length < 6 || password.length > 255) {
+		return new Error("Invalid password");
+	}
+
+	const existingUser = db.prepare("SELECT * FROM user WHERE username = ?").get(username) as
+		| DatabaseUser
+		| undefined;
+	if (!existingUser) {
+		return new Error("Incorrect username or password");
+	}
+
+	const validPassword = await new Argon2id().verify(existingUser.password, password);
+	if (!validPassword) {
+		return new Error("Incorrect username or password");
+	}
+
+	const session = await lucia.createSession(existingUser.id, {});
+	const event = getRequestEvent()!;
+	appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+	throw redirect("/");
+});

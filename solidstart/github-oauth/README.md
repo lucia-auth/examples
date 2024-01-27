@@ -1,26 +1,26 @@
-# GitHub OAuth example with Lucia and SolidStart
+# GitHub OAuth example in SolidStart
 
-This example uses `better-sqlite3`.
+Uses SQLite (`main.db`) database.
 
-```bash
-# install dependencies
+```
 pnpm i
-
-# run dev server
 pnpm dev
 ```
 
-## Runtime
+## Setup
 
-This example is built for Node.js 20. If you're using Node.js 16/18, un-comment the following lines in `auth/lucia.ts`:
+Create a GitHub OAuth app with the callback set to `http://localhost:3000/login/github/callback` and create an `.env` file.
 
-```ts
-// import "lucia/polyfill/node";
+```bash
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
 ```
 
-## User schema
+## Polyfill
 
-| id         | type     | unique |
-| ---------- | -------- | :----: |
-| `id`       | `string` |        |
-| `username` | `string` |   ✓    |
+If you're using Node 16 or 18, uncomment the code in `lib/auth.ts`. This is not required in Node 20, Bun, and Cloudflare Workers.
+
+```ts
+// import { webcrypto } from "crypto";
+// globalThis.crypto = webcrypto as Crypto;
+```

@@ -1,53 +1,29 @@
-import { useRouteData } from "solid-start";
-import {
-	ServerError,
-	createServerAction$,
-	createServerData$,
-	redirect
-} from "solid-start/server";
-import { auth } from "~/auth/lucia";
+import { action, createAsync, redirect } from "@solidjs/router";
+import { getRequestEvent } from "solid-js/web";
+import { appendHeader } from "@solidjs/start/server";
+import { lucia } from "~/lib/auth";
+import { getAuthenticatedUser } from "~/lib/utils";
 
-export const routeData = () => {
-	return createServerData$(async (_, event) => {
-		const authRequest = auth.handleRequest(event.request);
-		const session = await authRequest.validate();
-		if (!session) {
-			return redirect("/login") as never;
-		}
-		return session.user;
-	});
-};
-
-const Page = () => {
-	const user = useRouteData<typeof routeData>();
-	const [_, { Form }] = createServerAction$(async (_, event) => {
-		const authRequest = auth.handleRequest(event.request);
-		const session = await authRequest.validate();
-		if (!session) {
-			throw new ServerError("Unauthorized", {
-				status: 401
-			});
-		}
-		await auth.invalidateSession(session.sessionId); // invalidate session
-		const sessionCookie = auth.createSessionCookie(null);
-		return new Response(null, {
-			status: 302,
-			headers: {
-				Location: "/login",
-				"Set-Cookie": sessionCookie.serialize()
-			}
-		});
-	});
+export default function Index() {
+	const user = createAsync(getAuthenticatedUser);
 	return (
 		<>
-			<h1>Profile</h1>
-			<p>User id: {user()?.userId}</p>
-			<p>GitHub username: {user()?.githubUsername}</p>
-			<Form>
+			<h1>Hi, {user()?.username}!</h1>
+			<p>Your user ID is {user()?.id}.</p>
+			<form method="post" action={logout}>
 				<button>Sign out</button>
-			</Form>
+			</form>
 		</>
 	);
-};
+}
 
-export default Page;
+const logout = action(async () => {
+	"use server";
+	const event = getRequestEvent()!;
+	if (!event.context.session) {
+		return new Error("Unauthorized");
+	}
+	await lucia.invalidateSession(event.context.session.id);
+	appendHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
+	throw redirect("/login");
+});

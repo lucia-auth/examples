@@ -1,31 +1,18 @@
-import { auth, githubAuth } from "@/auth/lucia";
-import * as context from "next/headers";
+import { generateState } from "arctic";
+import { github } from "../../../lib/auth";
+import { cookies } from "next/headers";
 
-import type { NextRequest } from "next/server";
+export async function GET(): Promise<Response> {
+	const state = generateState();
+	const url = await github.createAuthorizationURL(state);
 
-export const GET = async (request: NextRequest) => {
-	const authRequest = auth.handleRequest(request.method, context);
-	const session = await authRequest.validate();
-	if (session) {
-		return new Response(null, {
-			status: 302,
-			headers: {
-				Location: "/"
-			}
-		});
-	}
-	const [url, state] = await githubAuth.getAuthorizationUrl();
-	const cookieStore = cookies();
-	cookieStore.set("github_oauth_state", state, {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === "production",
+	cookies().set("github_oauth_state", state, {
 		path: "/",
-		maxAge: 60 * 60
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		maxAge: 60 * 10,
+		sameSite: "lax"
 	});
-	return new Response(null, {
-		status: 302,
-		headers: {
-			Location: url.toString()
-		}
-	});
-};
+
+	return Response.redirect(url);
+}

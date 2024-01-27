@@ -1,27 +1,23 @@
 {
 	"name": "username-and-password",
 	"version": "1.0.0",
-	"description": "Username & password example with Lucia and Express",
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-		"dev": "tsx watch src",
-		"build": "tsc"
+		"dev": "tsx watch index.ts"
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.3",
-		"@types/body-parser": "^1.19.2",
-		"@types/express": "^4.17.17",
-		"@types/node": "^20",
-		"typescript": "^5.1.6"
+		"@types/better-sqlite3": "^7.6.8",
+		"@types/express": "^4.17.21",
+		"@types/node": "^20.10.5",
+		"tsx": "^4.7.0",
+		"typescript": "^5.3.3"
 	},
 	"dependencies": {
-		"@lucia-auth/adapter-sqlite": "latest",
-		"better-sqlite3": "^8.4.0",
+		"@lucia-auth/adapter-sqlite": "3.0.0-beta.12",
+		"better-sqlite3": "^9.2.2",
 		"express": "^4.18.2",
-		"lucia": "latest"
+		"lucia": "3.0.0-beta.14",
+		"oslo": "^0.27.0"
 	}
 }

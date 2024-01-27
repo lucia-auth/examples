@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
@@ -35,4 +36,5 @@ yarn-error.log*
 next-env.d.ts
 
 main.db
+
 .env

@@ -1,24 +1,26 @@
 {
 	"name": "github-oauth",
-	"description": "GitHub OAuth example with Lucia and Astro",
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "astro dev",
 		"start": "astro dev",
-		"build": "astro build",
+		"build": "astro check && astro build",
 		"preview": "astro preview",
 		"astro": "astro"
 	},
 	"dependencies": {
-		"@astrojs/node": "^8.0.0",
-		"@lucia-auth/adapter-sqlite": "latest",
-		"@lucia-auth/oauth": "latest",
-		"astro": "^4.2.4",
-		"better-sqlite3": "^8.4.0",
-		"lucia": "latest"
+		"@astrojs/check": "^0.3.4",
+		"@astrojs/node": "^7.0.2",
+		"@lucia-auth/adapter-sqlite": "3.0.0-beta.12",
+		"arctic": "^0.10.2",
+		"astro": "^4.0.7",
+		"better-sqlite3": "^9.2.2",
+		"lucia": "3.0.0-beta.14",
+		"oslo": "^0.27.0",
+		"typescript": "^5.3.3"
 	},
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.3"
+		"@types/better-sqlite3": "^7.6.8"
 	}
 }

@@ -1,26 +1,17 @@
-# Username & password example with Lucia and SolidStart
+# Username and password example in SolidStart
 
-This example uses `better-sqlite3`.
+Uses SQLite (`main.db`) database.
 
-```bash
-# install dependencies
+```
 pnpm i
-
-# run dev server
 pnpm dev
 ```
 
-## Runtime
+## Polyfill
 
-This example is built for Node.js 20. If you're using Node.js 16/18, un-comment the following lines in `auth/lucia.ts`:
+If you're using Node 16 or 18, uncomment the code in `src/lib/auth.ts`. This is not required in Node 20, Bun, and Cloudflare Workers.
 
 ```ts
-// import "lucia/polyfill/node";
+// import { webcrypto } from "crypto";
+// globalThis.crypto = webcrypto as Crypto;
 ```
-
-## User schema
-
-| id         | type     | unique |
-| ---------- | -------- | :----: |
-| `id`       | `string` |        |
-| `username` | `string` |   ✓    |

@@ -1,24 +1,34 @@
 ---
-import "../app.css";
-
-const session = await Astro.locals.auth.validate();
-if (!session) return Astro.redirect("/login", 302);
+const user = Astro.locals.user;
+if (!user) {
+	return Astro.redirect("/login");
+}
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Username & password auth with Lucia</title>
+		<title>Lucia example</title>
 	</head>
 	<body>
-		<h1>Profile</h1>
-		<p>User id: {session.user.userId}</p>
-		<p>Username: {session.user.username}</p>
-		<form method="post" action="/logout">
-			<input type="submit" value="Sign out" />
+		<h1>Hi, {user.username}!</h1>
+		<p>Your user ID is {user.id}.</p>
+		<form method="post" action="/api/logout">
+			<button>Sign out</button>
 		</form>
 	</body>
 </html>
+
+<script>
+	document.forms[0].addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const formElement = e.target as HTMLFormElement;
+		await fetch(formElement.action, {
+			method: formElement.method,
+			body: new FormData(formElement)
+		});
+		window.location.href = "/login";
+	});
+</script>

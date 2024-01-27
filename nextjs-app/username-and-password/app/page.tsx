@@ -1,21 +1,38 @@
-import { getPageSession } from "@/auth/lucia";
+import { lucia, validateRequest } from "@/lib/auth";
+import { Form } from "@/lib/form";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
-import Form from "@/components/form";
+import type { ActionResult } from "@/lib/form";
 
-const Page = async () => {
-	const session = await getPageSession();
-	if (!session) redirect("/login");
+export default async function Page() {
+	const { user } = await validateRequest();
+	if (!user) {
+		return redirect("/login");
+	}
 	return (
 		<>
-			<h1>Profile</h1>
-			<p>User id: {session.user.userId}</p>
-			<p>Username: {session.user.username}</p>
-			<Form action="/api/logout">
-				<input type="submit" value="Sign out" />
+			<h1>Hi, {user.username}!</h1>
+			<p>Your user ID is {user.id}.</p>
+			<Form action={logout}>
+				<button>Sign out</button>
 			</Form>
 		</>
 	);
-};
+}
 
-export default Page;
+async function logout(): Promise<ActionResult> {
+	"use server";
+	const { session } = await validateRequest();
+	if (!session) {
+		return {
+			error: "Unauthorized"
+		};
+	}
+
+	await lucia.invalidateSession(session.id);
+
+	const sessionCookie = lucia.createBlankSessionCookie();
+	cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+	return redirect("/login");
+}

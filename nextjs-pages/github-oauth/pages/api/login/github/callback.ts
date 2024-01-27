@@ -1,58 +1,65 @@
-import { auth, githubAuth } from "@/auth/lucia";
-import { OAuthRequestError } from "@lucia-auth/oauth";
-import { parseCookie } from "lucia/utils";
+import { github, lucia } from "@/lib/auth";
+import { OAuth2RequestError } from "arctic";
+import { db } from "@/lib/db";
+import { generateId } from "lucia";
 
 import type { NextApiRequest, NextApiResponse } from "next";
+import type { DatabaseUser } from "@/lib/db";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-	if (req.method !== "GET") return res.status(405);
-	const authRequest = auth.handleRequest({ req, res });
-	const session = await authRequest.validate();
-	if (session) {
-		return res.status(302).setHeader("Location", "/").end();
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+	if (req.method !== "GET") {
+		res.status(404).end();
+		return;
 	}
-	const cookies = parseCookie(req.headers.cookie ?? "");
-	const storedState = cookies.github_oauth_state;
-	const state = req.query.state;
-	const code = req.query.code;
-	// validate state
-	if (
-		!storedState ||
-		!state ||
-		storedState !== state ||
-		typeof code !== "string"
-	) {
-		return res.status(400).end();
+	const code = req.query.code?.toString() ?? null;
+	const state = req.query.state?.toString() ?? null;
+	const storedState = req.cookies.github_oauth_state ?? null;
+	if (!code || !state || !storedState || state !== storedState) {
+		console.log(code, state, storedState);
+		res.status(400).end();
+		return;
 	}
 	try {
-		const { getExistingUser, githubUser, createUser } =
-			await githubAuth.validateCallback(code);
-
-		const getUser = async () => {
-			const existingUser = await getExistingUser();
-			if (existingUser) return existingUser;
-			const user = await createUser({
-				attributes: {
-					username: githubUser.login
-				}
-			});
-			return user;
-		};
-
-		const user = await getUser();
-		const session = await auth.createSession({
-			userId: user.userId,
-			attributes: {}
+		const tokens = await github.validateAuthorizationCode(code);
+		const githubUserResponse = await fetch("https://api.github.com/user", {
+			headers: {
+				Authorization: `Bearer ${tokens.accessToken}`
+			}
 		});
-		authRequest.setSession(session);
-		return res.status(302).setHeader("Location", "/").end();
-	} catch (e) {
-		if (e instanceof OAuthRequestError) {
-			// invalid code
-			return res.status(400).end();
-		}
-		return res.status(500).end();
-	}
-};
+		const githubUser: GitHubUser = await githubUserResponse.json();
+		const existingUser = db.prepare("SELECT * FROM user WHERE github_id = ?").get(githubUser.id) as
+			| DatabaseUser
+			| undefined;
 
-export default handler;
+		if (existingUser) {
+			const session = await lucia.createSession(existingUser.id, {});
+			return res
+				.appendHeader("Set-Cookie", lucia.createSessionCookie(session.id).serialize())
+				.redirect("/");
+		}
+
+		const userId = generateId(15);
+		db.prepare("INSERT INTO user (id, github_id, username) VALUES (?, ?, ?)").run(
+			userId,
+			githubUser.id,
+			githubUser.login
+		);
+		const session = await lucia.createSession(userId, {});
+		return res
+			.appendHeader("Set-Cookie", lucia.createSessionCookie(session.id).serialize())
+			.redirect("/");
+	} catch (e) {
+		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
+			// invalid code
+			res.status(400).end();
+			return;
+		}
+		res.status(500).end();
+		return;
+	}
+}
+
+interface GitHubUser {
+	id: string;
+	login: string;
+}

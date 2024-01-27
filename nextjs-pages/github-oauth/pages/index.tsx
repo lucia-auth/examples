@@ -1,4 +1,4 @@
-import { auth } from "@/auth/lucia";
+import { validateRequest } from "@/lib/auth";
 import { useRouter } from "next/router";
 
 import type {
@@ -6,62 +6,49 @@ import type {
 	GetServerSidePropsResult,
 	InferGetServerSidePropsType
 } from "next";
+import type { User } from "lucia";
 
-export const getServerSideProps = async (
-	context: GetServerSidePropsContext
-): Promise<
+export async function getServerSideProps(context: GetServerSidePropsContext): Promise<
 	GetServerSidePropsResult<{
-		userId: string;
-		githubUsername: string;
+		user: User;
 	}>
-> => {
-	const authRequest = auth.handleRequest(context);
-	const session = await authRequest.validate();
-	if (!session) {
+> {
+	const { user } = await validateRequest(context.req, context.res);
+	if (!user) {
 		return {
 			redirect: {
-				destination: "/login",
-				permanent: false
+				permanent: false,
+				destination: "/login"
 			}
 		};
 	}
 	return {
 		props: {
-			userId: session.user.userId,
-			githubUsername: session.user.githubUsername
+			user
 		}
 	};
-};
+}
 
-const Page = (
-	props: InferGetServerSidePropsType<typeof getServerSideProps>
-) => {
+export default function Page({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 	const router = useRouter();
 	return (
 		<>
-			<h1>Profile</h1>
-			<p>User id: {props.userId}</p>
-			<p>GitHub username:: {props.githubUsername}</p>
+			<h1>Hi, {user.username}!</h1>
+			<p>Your user ID is {user.id}.</p>
 			<form
 				method="post"
 				action="/api/logout"
 				onSubmit={async (e) => {
 					e.preventDefault();
-					const response = await fetch("/api/logout", {
-						method: "POST",
-						redirect: "manual"
+					const formElement = e.target as HTMLFormElement;
+					await fetch(formElement.action, {
+						method: formElement.method
 					});
-					if (response.status === 0) {
-						// redirected
-						// when using `redirect: "manual"`, response status 0 is returned
-						return router.push("/login");
-					}
+					router.push("/login");
 				}}
 			>
-				<input type="submit" value="Sign out" />
+				<button>Sign out</button>
 			</form>
 		</>
 	);
-};
-
-export default Page;
+}

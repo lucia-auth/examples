@@ -1,35 +1,26 @@
-# GitHub OAuth example with Lucia and Next.js App Router
+# GitHub OAuth example in Next.js App router
 
-This example uses `better-sqlite3`. Make sure to setup your `.env` file.
+Uses SQLite (`main.db`) database.
 
-```bash
-# install dependencies
+```
 pnpm i
-
-# run dev server
 pnpm dev
 ```
 
-## Runtime
+## Setup
 
-This example is built for Node.js 20. If you're using Node.js 16/18, un-comment the following lines in `auth/lucia.ts`:
-
-```ts
-// import "lucia/polyfill/node";
-```
-
-## Setup GitHub OAuth
-
-[Create a new GitHub OAuth app](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app). The redirect uri should be set to `localhost:5173/login/github/callback`. Copy and paste the client id and secret into `.env`.
+Create a GitHub OAuth app with the callback set to `http://localhost:3000/login/github/callback` and create an `.env` file.
 
 ```bash
 GITHUB_CLIENT_ID=""
 GITHUB_CLIENT_SECRET=""
 ```
 
-## User schema
+## Polyfill
 
-| id         | type     | unique |
-| ---------- | -------- | :----: |
-| `id`       | `string` |        |
-| `username` | `string` |        |
+If you're using Node 16 or 18, uncomment the code in `lib/auth.ts`. This is not required in Node 20, Bun, and Cloudflare Workers.
+
+```ts
+// import { webcrypto } from "crypto";
+// globalThis.crypto = webcrypto as Crypto;
+```

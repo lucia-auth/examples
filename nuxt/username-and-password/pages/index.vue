@@ -5,21 +5,18 @@ definePageMeta({
 
 const user = useAuthenticatedUser();
 
-const handleLogout = async (e: Event) => {
-	if (!(e.target instanceof HTMLFormElement)) return;
-	await $fetch("/api/logout", {
-		method: "POST",
-		redirect: "manual"
+async function logout() {
+	await useFetch("/api/logout", {
+		method: "POST"
 	});
-	await navigateTo("/login");
-};
+	navigateTo("/login");
+}
 </script>
 
 <template>
-	<h1>Profile</h1>
-	<p>User id: {{ user.userId }}</p>
-	<p>Username: {{ user.username }}</p>
-	<form method="post" action="/api/logout" @submit.prevent="handleLogout">
-		<input type="submit" value="Sign out" />
+	<h1>Hi, {{ user.username }}!</h1>
+	<p>Your user ID is {{ user.id }}.</p>
+	<form @submit.prevent="logout">
+		<button>Sign out</button>
 	</form>
 </template>

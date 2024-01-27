@@ -1,16 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-	devtools: { enabled: true },
 	app: {
 		head: {
-			title: "GitHub OAuth with Lucia"
+			title: "Lucia example"
 		}
 	},
 	runtimeConfig: {
-		githubClientId: "",
-		githubClientSecret: ""
+		githubClientId: process.env.GITHUB_CLIENT_ID,
+		githubClientSecret: process.env.GITHUB_CLIENT_SECRET
 	}
-	// nitro: {
-	// 	moduleSideEffects: ["lucia/polyfill/node"]
-	// }
 });
