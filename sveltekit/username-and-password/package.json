@@ -18,13 +18,13 @@
 		"svelte-check": "^3.6.0",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
-		"vite": "^5.0.3"
+		"vite": "^5.0.12"
 	},
 	"type": "module",
 	"dependencies": {
-		"@lucia-auth/adapter-sqlite": "3.0.0-beta.12",
+		"@lucia-auth/adapter-sqlite": "^3.0.0",
 		"better-sqlite3": "^9.2.2",
-		"lucia": "3.0.0-beta.14",
-		"oslo": "^0.27.0"
+		"lucia": "^3.0.1",
+		"oslo": "1.0.2"
 	}
 }
