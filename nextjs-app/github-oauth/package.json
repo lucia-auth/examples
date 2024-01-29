@@ -9,12 +9,12 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@lucia-auth/adapter-sqlite": "3.0.0-beta.12",
+		"@lucia-auth/adapter-sqlite": "^3.0.0",
 		"arctic": "^0.10.2",
 		"better-sqlite3": "^9.2.2",
-		"lucia": "3.0.0-beta.14",
+		"lucia": "^3.0.1",
 		"next": "14.0.4",
-		"oslo": "^0.27.0",
+		"oslo": "^1.0.3",
 		"react": "^18",
 		"react-dom": "^18"
 	},
