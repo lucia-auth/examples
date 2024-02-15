@@ -1,7 +1,9 @@
 import type { User } from "lucia";
 
+const useSessionState = () => useState<UserQuery['user'] | null>('user', () => null)
+
 export const useUser = () => {
-	const user = useState<User | null>("user", () => null);
+	const user = useSessionState()
 	return user;
 };
 
