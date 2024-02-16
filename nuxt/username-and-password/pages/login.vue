@@ -2,14 +2,14 @@
 const error = ref<string | null>(null);
 
 async function login(e: Event) {
-	const result = await useFetch("/api/login", {
-		method: "POST",
-		body: new FormData(e.target as HTMLFormElement)
-	});
-	if (result.error.value) {
-		error.value = result.error.value.data?.message ?? null;
-	} else {
+	try {
+		await $fetch("/api/login", {
+			method: "POST",
+			body: new FormData(e.target as HTMLFormElement)
+		});
 		await navigateTo("/");
+	} catch (err) {
+		error.value = err.data?.message ?? null;
 	}
 }
 </script>

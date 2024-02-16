@@ -6,10 +6,10 @@ definePageMeta({
 const user = useAuthenticatedUser();
 
 async function logout() {
-	await useFetch("/api/logout", {
+	await $fetch("/api/logout", {
 		method: "POST"
 	});
-	navigateTo("/login");
+	await navigateTo("/login");
 }
 </script>
 
