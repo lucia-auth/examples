@@ -11,36 +11,36 @@ import type { Context } from "../lib/context.js";
 export const signupRouter = new Hono<Context>();
 
 signupRouter.get("/signup", async (c) => {
-  const session = c.get("session")	
-  if (session) {
+	const session = c.get("session");
+	if (session) {
 		return c.redirect("/");
 	}
 	const html = await renderPage();
-  return new Response(html, {
-    headers: {
-      "Content-Type": "text/html"
-    },
-    status: 200
-  })
+	return new Response(html, {
+		headers: {
+			"Content-Type": "text/html"
+		},
+		status: 200
+	});
 });
 
 signupRouter.post("/signup", async (c) => {
-  const body = await c.req.parseBody<{
-    username: string;
-    password: string;
-  }>()
+	const body = await c.req.parseBody<{
+		username: string;
+		password: string;
+	}>();
 	const username: string | null = body.username ?? null;
 	if (!username || username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
 		const html = await renderPage({
 			username_value: username ?? "",
 			error: "Invalid password"
 		});
-    return new Response(html, {
-      headers: {
-        "Content-Type": "text/html"
-      },
-      status: 200
-    })
+		return new Response(html, {
+			headers: {
+				"Content-Type": "text/html"
+			},
+			status: 200
+		});
 	}
 	const password: string | null = body.password ?? null;
 	if (!password || password.length < 6 || password.length > 255) {
@@ -48,12 +48,12 @@ signupRouter.post("/signup", async (c) => {
 			username_value: username,
 			error: "Invalid password"
 		});
-    return new Response(html, {
-      headers: {
-        "Content-Type": "text/html"
-      },
-      status: 200
-    })
+		return new Response(html, {
+			headers: {
+				"Content-Type": "text/html"
+			},
+			status: 200
+		});
 	}
 
 	const hashedPassword = await new Argon2id().hash(password);
@@ -67,31 +67,31 @@ signupRouter.post("/signup", async (c) => {
 		);
 
 		const session = await lucia.createSession(userId, {});
-		c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), { append: true })
-    return c.redirect("/");
+		c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), { append: true });
+		return c.redirect("/");
 	} catch (e) {
 		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			const html = await renderPage({
 				username_value: username,
 				error: "Username already used"
 			});
-      return new Response(html, {
-        headers: {
-          "Content-Type": "text/html"
-        },
-        status: 200
-      })
+			return new Response(html, {
+				headers: {
+					"Content-Type": "text/html"
+				},
+				status: 200
+			});
 		}
 		const html = await renderPage({
 			username_value: username,
 			error: "An unknown error occurred"
 		});
-    return new Response(html, {
-      headers: {
-        "Content-Type": "text/html"
-      },
-      status: 200
-    })
+		return new Response(html, {
+			headers: {
+				"Content-Type": "text/html"
+			},
+			status: 200
+		});
 	}
 });
 

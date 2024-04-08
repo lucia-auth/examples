@@ -10,36 +10,36 @@ import type { Context } from "../lib/context.js";
 export const loginRouter = new Hono<Context>();
 
 loginRouter.get("/login", async (c) => {
-  const session = c.get("session")
+	const session = c.get("session");
 	if (session) {
 		return c.redirect("/");
 	}
 	const html = await renderPage();
-  return new Response(html, { 
-    headers: {
-      "Content-Type": "text/html"
-    } ,
-    status: 200
-  })
+	return new Response(html, {
+		headers: {
+			"Content-Type": "text/html"
+		},
+		status: 200
+	});
 });
 
 loginRouter.post("/login", async (c) => {
-  const body = await c.req.parseBody<{
-    username: string;
-    password: string;
-  }>()
+	const body = await c.req.parseBody<{
+		username: string;
+		password: string;
+	}>();
 	const username: string | null = body.username ?? null;
 	if (!username || username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
 		const html = await renderPage({
 			username_value: username ?? "",
 			error: "Invalid password"
 		});
-    return new Response(html, { 
-      headers: {
-        "Content-Type": "text/html"
-      } ,
-      status: 200
-    })
+		return new Response(html, {
+			headers: {
+				"Content-Type": "text/html"
+			},
+			status: 200
+		});
 	}
 	const password: string | null = body.password ?? null;
 	if (!password || password.length < 6 || password.length > 255) {
@@ -47,12 +47,12 @@ loginRouter.post("/login", async (c) => {
 			username_value: username,
 			error: "Invalid password"
 		});
-    return new Response(html, { 
-      headers: {
-        "Content-Type": "text/html"
-      } ,
-      status: 200
-    })
+		return new Response(html, {
+			headers: {
+				"Content-Type": "text/html"
+			},
+			status: 200
+		});
 	}
 
 	const existingUser = db.prepare("SELECT * FROM user WHERE username = ?").get(username) as
@@ -63,12 +63,12 @@ loginRouter.post("/login", async (c) => {
 			username_value: username,
 			error: "Incorrect username or password"
 		});
-    return new Response(html, { 
-      headers: {
-        "Content-Type": "text/html"
-      } ,
-      status: 200
-    })
+		return new Response(html, {
+			headers: {
+				"Content-Type": "text/html"
+			},
+			status: 200
+		});
 	}
 
 	const validPassword = await new Argon2id().verify(existingUser.password, password);
@@ -77,18 +77,18 @@ loginRouter.post("/login", async (c) => {
 			username_value: username,
 			error: "Incorrect username or password"
 		});
-    return new Response(html, { 
-      headers: {
-        "Content-Type": "text/html"
-      } ,
-      status: 200
-    })
+		return new Response(html, {
+			headers: {
+				"Content-Type": "text/html"
+			},
+			status: 200
+		});
 	}
 
 	const session = await lucia.createSession(existingUser.id, {});
-	c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), { append: true })
-  c.header("Location", "/", { append: true })
-  return c.redirect("/");
+	c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), { append: true });
+	c.header("Location", "/", { append: true });
+	return c.redirect("/");
 });
 
 async function renderPage(args?: { username_value?: string; error?: string }): Promise<string> {
