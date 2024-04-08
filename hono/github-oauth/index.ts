@@ -15,8 +15,8 @@ app.use("*", async (c, next) => {
 	if (c.req.method === "GET") {
 		return next();
 	}
-	const originHeader = c.req.header("origin") ?? null;
-	const hostHeader = c.req.header("host") ?? null;
+	const originHeader = c.req.header("Origin") ?? null;
+	const hostHeader = c.req.header("Host") ?? null;
 	if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
 		return new Response(null, { status: 400 });
 	}
@@ -24,7 +24,7 @@ app.use("*", async (c, next) => {
 });
 
 app.use("*", async (c, next) => {
-	const sessionId = lucia.readSessionCookie(c.req.header("cookie") ?? "");
+	const sessionId = lucia.readSessionCookie(c.req.header("Cookie") ?? "");
 	if (!sessionId) {
 		c.set("user", null);
 		c.set("session", null);
@@ -45,11 +45,9 @@ app.use("*", async (c, next) => {
 
 app.route("/", mainRouter).route("/", loginRouter).route("/", logoutRouter);
 
-serve(
-	{
-		fetch: app.fetch,
-		port: 3000
-	},
-);
+serve({
+	fetch: app.fetch,
+	port: 3000
+});
 
 console.log("Server running on port 3000");

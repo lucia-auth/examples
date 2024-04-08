@@ -30,7 +30,7 @@ githubLoginRouter.get("/login/github", async (c) => {
 githubLoginRouter.get("/login/github/callback", async (c) => {
 	const code = c.req.query("code")?.toString() ?? null;
 	const state = c.req.query("state")?.toString() ?? null;
-	const storedState = parseCookies(c.req.header("cookie") ?? "").get("github_oauth_state") ?? null;
+	const storedState = parseCookies(c.req.header("Cookie") ?? "").get("github_oauth_state") ?? null;
 	if (!code || !state || !storedState || state !== storedState) {
 		console.log(code, state, storedState);
 		return new Response(null, { status: 400 });
