@@ -18,7 +18,7 @@ app.use("*", async (c, next) => {
 	const originHeader = c.req.header("Origin") ?? null;
 	const hostHeader = c.req.header("Host") ?? null;
 	if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
-		return new Response(null, { status: 400 });
+		return c.text("", 403);
 	}
 	return next();
 });

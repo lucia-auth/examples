@@ -15,11 +15,8 @@ loginRouter.get("/login", async (c) => {
 		return c.redirect("/");
 	}
 	const html = await renderPage();
-	return new Response(html, {
-		headers: {
-			"Content-Type": "text/html"
-		},
-		status: 200
+	return c.text(html, 200, {
+		"Content-Type": "text/html"
 	});
 });
 
@@ -34,11 +31,8 @@ loginRouter.post("/login", async (c) => {
 			username_value: username ?? "",
 			error: "Invalid password"
 		});
-		return new Response(html, {
-			headers: {
-				"Content-Type": "text/html"
-			},
-			status: 200
+		return c.text(html, 200, {
+			"Content-Type": "text/html"
 		});
 	}
 	const password: string | null = body.password ?? null;
@@ -47,11 +41,8 @@ loginRouter.post("/login", async (c) => {
 			username_value: username,
 			error: "Invalid password"
 		});
-		return new Response(html, {
-			headers: {
-				"Content-Type": "text/html"
-			},
-			status: 200
+		return c.text(html, 200, {
+			"Content-Type": "text/html"
 		});
 	}
 
@@ -63,11 +54,8 @@ loginRouter.post("/login", async (c) => {
 			username_value: username,
 			error: "Incorrect username or password"
 		});
-		return new Response(html, {
-			headers: {
-				"Content-Type": "text/html"
-			},
-			status: 200
+		return c.text(html, 200, {
+			"Content-Type": "text/html"
 		});
 	}
 
@@ -77,11 +65,8 @@ loginRouter.post("/login", async (c) => {
 			username_value: username,
 			error: "Incorrect username or password"
 		});
-		return new Response(html, {
-			headers: {
-				"Content-Type": "text/html"
-			},
-			status: 200
+		return c.text(html, 200, {
+			"Content-Type": "text/html"
 		});
 	}
 

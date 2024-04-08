@@ -16,11 +16,8 @@ signupRouter.get("/signup", async (c) => {
 		return c.redirect("/");
 	}
 	const html = await renderPage();
-	return new Response(html, {
-		headers: {
-			"Content-Type": "text/html"
-		},
-		status: 200
+	return c.text(html, 200, {
+		"Content-Type": "text/html"
 	});
 });
 
@@ -35,11 +32,8 @@ signupRouter.post("/signup", async (c) => {
 			username_value: username ?? "",
 			error: "Invalid password"
 		});
-		return new Response(html, {
-			headers: {
-				"Content-Type": "text/html"
-			},
-			status: 200
+		return c.text(html, 200, {
+			"Content-Type": "text/html"
 		});
 	}
 	const password: string | null = body.password ?? null;
@@ -48,11 +42,8 @@ signupRouter.post("/signup", async (c) => {
 			username_value: username,
 			error: "Invalid password"
 		});
-		return new Response(html, {
-			headers: {
-				"Content-Type": "text/html"
-			},
-			status: 200
+		return c.text(html, 200, {
+			"Content-Type": "text/html"
 		});
 	}
 
@@ -75,22 +66,16 @@ signupRouter.post("/signup", async (c) => {
 				username_value: username,
 				error: "Username already used"
 			});
-			return new Response(html, {
-				headers: {
-					"Content-Type": "text/html"
-				},
-				status: 200
+			return c.text(html, 200, {
+				"Content-Type": "text/html"
 			});
 		}
 		const html = await renderPage({
 			username_value: username,
 			error: "An unknown error occurred"
 		});
-		return new Response(html, {
-			headers: {
-				"Content-Type": "text/html"
-			},
-			status: 200
+		return c.text(html, 200, {
+			"Content-Type": "text/html"
 		});
 	}
 });

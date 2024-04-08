@@ -14,10 +14,7 @@ loginRouter.get("/login", async (c) => {
 		return c.redirect("/");
 	}
 	const htmlFile = await fs.readFile("routes/login/index.html");
-	return new Response(htmlFile, {
-		headers: {
-			"Content-Type": "text/html"
-		},
-		status: 200
+	return c.text(htmlFile.toString(), 200, {
+		"Content-Type": "text/html"
 	});
 });

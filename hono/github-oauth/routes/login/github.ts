@@ -29,7 +29,7 @@ githubLoginRouter.get("/login/github/callback", async (c) => {
 	const storedState = getCookie(c).github_oauth_state ?? null;
 	if (!code || !state || !storedState || state !== storedState) {
 		console.log(code, state, storedState);
-		return new Response(null, { status: 400 });
+		return c.text("", 400);
 	}
 	try {
 		const tokens = await github.validateAuthorizationCode(code);
@@ -61,9 +61,9 @@ githubLoginRouter.get("/login/github/callback", async (c) => {
 	} catch (e) {
 		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
-			return new Response(null, { status: 400 });
+			return c.text("", 400);
 		}
-		return new Response(null, { status: 500 });
+		return c.text("", 500);
 	}
 });
 

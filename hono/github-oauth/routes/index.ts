@@ -14,10 +14,7 @@ mainRouter.get("/", async (c) => {
 	let template = templateFile.toString("utf-8");
 	template = template.replaceAll("%username%", user.username);
 	template = template.replaceAll("%user_id%", user.id);
-	return new Response(template, {
-		headers: {
-			"Content-Type": "text/html"
-		},
-		status: 200
+	return c.text(template, 200, {
+		"Content-Type": "text/html"
 	});
 });
