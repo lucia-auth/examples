@@ -1,6 +1,6 @@
 import { OAuth2RequestError, generateState } from "arctic";
 import { github, lucia } from "../../lib/auth.js";
-import { parseCookies, serializeCookie } from "oslo/cookie";
+import { getCookie, setCookie } from "hono/cookie";
 import { db } from "../../lib/db.js";
 import { generateId } from "lucia";
 import { Hono } from "hono";
@@ -13,24 +13,20 @@ export const githubLoginRouter = new Hono<Context>();
 githubLoginRouter.get("/login/github", async (c) => {
 	const state = generateState();
 	const url = await github.createAuthorizationURL(state);
-	c.header(
-		"Set-Cookie",
-		serializeCookie("github_oauth_state", state, {
-			path: "/",
-			secure: process.env.NODE_ENV === "production",
-			httpOnly: true,
-			maxAge: 60 * 10,
-			sameSite: "lax"
-		}),
-		{ append: true }
-	);
+	setCookie(c, "github_oauth_state", state, {
+		path: "/",
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		maxAge: 60 * 10,
+		sameSite: "Lax"
+	});
 	return c.redirect(url.toString());
 });
 
 githubLoginRouter.get("/login/github/callback", async (c) => {
 	const code = c.req.query("code")?.toString() ?? null;
 	const state = c.req.query("state")?.toString() ?? null;
-	const storedState = parseCookies(c.req.header("Cookie") ?? "").get("github_oauth_state") ?? null;
+	const storedState = getCookie(c).github_oauth_state ?? null;
 	if (!code || !state || !storedState || state !== storedState) {
 		console.log(code, state, storedState);
 		return new Response(null, { status: 400 });
