@@ -1,23 +1,16 @@
-import {
-	getQuery,
-	createError,
-	getCookie,
-	appendHeader,
-	sendRedirect
-} from "@solidjs/start/server";
 import { OAuth2RequestError } from "arctic";
 import { generateId } from "lucia";
 import { github, lucia } from "~/lib/auth";
 import { db } from "~/lib/db";
 
-import type { APIEvent } from "@solidjs/start/server";
 import type { DatabaseUser } from "~/lib/db";
+import { createError, getCookie, getQuery, setCookie } from "vinxi/http";
 
-export async function GET(event: APIEvent) {
-	const query = getQuery(event);
+export async function GET() {
+	const query = getQuery();
 	const code = query.code?.toString() ?? null;
 	const state = query.state?.toString() ?? null;
-	const storedState = getCookie(event, "github_oauth_state") ?? null;
+	const storedState = getCookie("github_oauth_state") ?? null;
 	if (!code || !state || !storedState || state !== storedState) {
 		throw createError({
 			status: 400
@@ -38,8 +31,9 @@ export async function GET(event: APIEvent) {
 
 		if (existingUser) {
 			const session = await lucia.createSession(existingUser.id, {});
-			appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
-			return sendRedirect(event, "/");
+			const cookie = lucia.createSessionCookie(session.id);
+
+			setCookie(cookie.name, cookie.value, cookie.attributes);
 		}
 
 		const userId = generateId(15);
@@ -49,8 +43,10 @@ export async function GET(event: APIEvent) {
 			githubUser.login
 		);
 		const session = await lucia.createSession(userId, {});
-		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
-		return sendRedirect(event, "/");
+		const cookie = lucia.createSessionCookie(session.id);
+
+		setCookie(cookie.name, cookie.value, cookie.attributes);
+		return Response.redirect("/");
 	} catch (e) {
 		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code

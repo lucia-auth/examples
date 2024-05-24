@@ -1,11 +1,11 @@
 import { action, redirect, useSubmission } from "@solidjs/router";
 import { Argon2id } from "oslo/password";
-import { Show, getRequestEvent } from "solid-js/web";
-import { appendHeader } from "@solidjs/start/server";
+import { Show } from "solid-js/web";
 import { lucia } from "~/lib/auth";
 import { db } from "~/lib/db";
 
 import type { DatabaseUser } from "~/lib/db";
+import { setCookie } from "vinxi/http";
 
 export default function Index() {
 	const submission = useSubmission(login);
@@ -56,7 +56,10 @@ const login = action(async (formData: FormData) => {
 	}
 
 	const session = await lucia.createSession(existingUser.id, {});
-	const event = getRequestEvent()!;
-	appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+
+	const cookie = lucia.createSessionCookie(session.id);
+
+	setCookie(cookie.name, cookie.value, cookie.attributes);
+
 	throw redirect("/");
 });

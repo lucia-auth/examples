@@ -2,10 +2,10 @@ import { action, redirect, useSubmission } from "@solidjs/router";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 import { Show, getRequestEvent } from "solid-js/web";
-import { appendHeader } from "@solidjs/start/server";
 import { lucia } from "~/lib/auth";
 import { db } from "~/lib/db";
 import { SqliteError } from "better-sqlite3";
+import { setCookie } from "vinxi/http";
 
 export default function Index() {
 	const submission = useSubmission(signup);
@@ -54,8 +54,10 @@ const signup = action(async (formData: FormData) => {
 		);
 
 		const session = await lucia.createSession(userId, {});
-		const event = getRequestEvent()!;
-		appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+
+		const cookie = lucia.createSessionCookie(session.id);
+
+		setCookie(cookie.name, cookie.value, cookie.attributes);
 	} catch (e) {
 		if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			return new Error("Username already used");

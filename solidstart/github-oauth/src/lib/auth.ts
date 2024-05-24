@@ -4,6 +4,7 @@ import { db } from "./db";
 import { GitHub } from "arctic";
 
 import type { DatabaseUser } from "./db";
+import { isDev } from "solid-js/web";
 
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
@@ -16,7 +17,7 @@ const adapter = new BetterSqlite3Adapter(db, {
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
 		attributes: {
-			secure: import.meta.env.PROD
+			secure: !isDev
 		}
 	},
 	getUserAttributes: (attributes) => {
