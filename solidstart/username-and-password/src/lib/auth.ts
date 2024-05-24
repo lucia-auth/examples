@@ -3,6 +3,7 @@ import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { db } from "./db";
 
 import type { DatabaseUser } from "./db";
+import { isDev } from "solid-js/web";
 
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
@@ -15,7 +16,7 @@ const adapter = new BetterSqlite3Adapter(db, {
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
 		attributes: {
-			secure: process.env.NODE_ENV === "production"
+			secure: !isDev
 		}
 	},
 	getUserAttributes: (attributes) => {
