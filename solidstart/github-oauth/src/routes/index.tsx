@@ -1,11 +1,11 @@
 import { action, createAsync, redirect } from "@solidjs/router";
 import { getRequestEvent } from "solid-js/web";
-import { appendHeader } from "@solidjs/start/server";
+import { setCookie } from "vinxi/http";
 import { lucia } from "~/lib/auth";
 import { getAuthenticatedUser } from "~/lib/utils";
 
 export default function Index() {
-	const user = createAsync(getAuthenticatedUser);
+	const user = createAsync(() => getAuthenticatedUser());
 	return (
 		<>
 			<h1>Hi, {user()?.username}!</h1>
@@ -20,10 +20,12 @@ export default function Index() {
 const logout = action(async () => {
 	"use server";
 	const event = getRequestEvent()!;
-	if (!event.context.session) {
+	if (!event.locals.session) {
 		return new Error("Unauthorized");
 	}
-	await lucia.invalidateSession(event.context.session.id);
-	appendHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
+	await lucia.invalidateSession(event.locals.session.id);
+	const cookie = lucia.createSessionCookie(event.locals.session.id);
+
+	setCookie(cookie.name, cookie.value, cookie.attributes);
 	throw redirect("/login");
 });
