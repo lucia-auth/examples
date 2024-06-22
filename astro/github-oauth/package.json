@@ -16,8 +16,7 @@
 		"arctic": "^0.10.2",
 		"astro": "^4.0.7",
 		"better-sqlite3": "^9.2.2",
-		"lucia": "^3.0.1",
-		"oslo": "^1.0.3",
+		"lucia": "^3.2.0",
 		"typescript": "^5.3.3"
 	},
 	"devDependencies": {

@@ -1,5 +1,5 @@
 import { action, redirect, useSubmission } from "@solidjs/router";
-import { Argon2id } from "oslo/password";
+import { verify } from "@node-rs/argon2";
 import { Show, getRequestEvent } from "solid-js/web";
 import { appendHeader } from "@solidjs/start/server";
 import { lucia } from "~/lib/auth";
@@ -50,7 +50,12 @@ const login = action(async (formData: FormData) => {
 		return new Error("Incorrect username or password");
 	}
 
-	const validPassword = await new Argon2id().verify(existingUser.password, password);
+	const validPassword = await verify(existingUser.password_hash, password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 	if (!validPassword) {
 		return new Error("Incorrect username or password");
 	}

@@ -1,6 +1,6 @@
 import { action, redirect, useSubmission } from "@solidjs/router";
 import { generateId } from "lucia";
-import { Argon2id } from "oslo/password";
+import { hash } from "@node-rs/argon2";
 import { Show, getRequestEvent } from "solid-js/web";
 import { appendHeader } from "@solidjs/start/server";
 import { lucia } from "~/lib/auth";
@@ -43,14 +43,20 @@ const signup = action(async (formData: FormData) => {
 		return new Error("Invalid password");
 	}
 
-	const hashedPassword = await new Argon2id().hash(password);
+	const passwordHash = await hash(password, {
+		// recommended minimum parameters
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 	const userId = generateId(15);
 
 	try {
-		db.prepare("INSERT INTO user (id, username, password) VALUES(?, ?, ?)").run(
+		db.prepare("INSERT INTO user (id, username, password_hash) VALUES(?, ?, ?)").run(
 			userId,
 			username,
-			hashedPassword
+			passwordHash
 		);
 
 		const session = await lucia.createSession(userId, {});

@@ -1,6 +1,6 @@
 import { lucia } from "$lib/server/auth";
 import { fail, redirect } from "@sveltejs/kit";
-import { Argon2id } from "oslo/password";
+import { verify } from "@node-rs/argon2";
 import { db } from "$lib/server/db";
 
 import type { Actions, PageServerLoad } from "./$types";
@@ -44,7 +44,12 @@ export const actions: Actions = {
 			});
 		}
 
-		const validPassword = await new Argon2id().verify(existingUser.password, password);
+		const validPassword = await verify(existingUser.password_hash, password, {
+			memoryCost: 19456,
+			timeCost: 2,
+			outputLen: 32,
+			parallelism: 1
+		});
 		if (!validPassword) {
 			return fail(400, {
 				message: "Incorrect username or password"

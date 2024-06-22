@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { db } from "@/lib/db";
-import { Argon2id } from "oslo/password";
+import { verify } from "@node-rs/argon2";
 import { cookies } from "next/headers";
 import { lucia, validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -61,7 +61,12 @@ async function login(_: any, formData: FormData): Promise<ActionResult> {
 		};
 	}
 
-	const validPassword = await new Argon2id().verify(existingUser.password, password);
+	const validPassword = await verify(existingUser.password_hash, password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 	if (!validPassword) {
 		return {
 			error: "Incorrect username or password"

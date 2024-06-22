@@ -1,4 +1,4 @@
-import { Argon2id } from "oslo/password";
+import { verify } from "@node-rs/argon2";
 import { db } from "../utils/db";
 
 import type { DatabaseUser } from "../utils/db";

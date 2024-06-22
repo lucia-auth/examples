@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	experimental: {
-		serverComponentsExternalPackages: ["oslo"]
+		serverComponentsExternalPackages: ["@node-rs/argon2"]
 	}
 };
 

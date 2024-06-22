@@ -20,7 +20,6 @@
 		"@lucia-auth/adapter-sqlite": "^3.0.0",
 		"arctic": "^0.10.2",
 		"better-sqlite3": "^9.2.2",
-		"lucia": "^3.0.1",
-		"oslo": "^1.0.3"
+		"lucia": "^3.2.0"
 	}
 }
