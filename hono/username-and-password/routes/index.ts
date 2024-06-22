@@ -14,7 +14,5 @@ mainRouter.get("/", async (c) => {
 		username: user.username,
 		user_id: user.id
 	});
-	return c.text(html, 200, {
-		"Content-Type": "text/html"
-	});
+	return c.html(html, 200);
 });

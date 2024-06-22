@@ -9,7 +9,6 @@ import { loginRouter } from "./routes/login.js";
 import { signupRouter } from "./routes/signup.js";
 import { logoutRouter } from "./routes/logout.js";
 
-import type { User, Session } from "lucia";
 import type { Context } from "./lib/context.js";
 
 const app = new Hono<Context>();
@@ -21,7 +20,7 @@ app.use("*", async (c, next) => {
 	const originHeader = c.req.header("Origin") ?? null;
 	const hostHeader = c.req.header("Host") ?? null;
 	if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader])) {
-		return c.text("", 403);
+		return c.body(null, 403);
 	}
 	return next();
 });

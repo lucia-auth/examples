@@ -28,8 +28,7 @@ githubLoginRouter.get("/login/github/callback", async (c) => {
 	const state = c.req.query("state")?.toString() ?? null;
 	const storedState = getCookie(c).github_oauth_state ?? null;
 	if (!code || !state || !storedState || state !== storedState) {
-		console.log(code, state, storedState);
-		return c.text("", 400);
+		return c.body(null, 400);
 	}
 	try {
 		const tokens = await github.validateAuthorizationCode(code);
@@ -39,10 +38,9 @@ githubLoginRouter.get("/login/github/callback", async (c) => {
 			}
 		});
 		const githubUser: GitHubUser = await githubUserResponse.json();
-		const existingUser = db.prepare("SELECT * FROM user WHERE github_id = ?").get(githubUser.id) as
-			| DatabaseUser
-			| undefined;
-
+		const existingUser: DatabaseUser | null = (db
+			.prepare("SELECT * FROM user WHERE github_id = ?")
+			.get(githubUser.id) ?? null) as DatabaseUser | null;
 		if (existingUser) {
 			const session = await lucia.createSession(existingUser.id, {});
 			c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), { append: true });
@@ -61,9 +59,9 @@ githubLoginRouter.get("/login/github/callback", async (c) => {
 	} catch (e) {
 		if (e instanceof OAuth2RequestError && e.message === "bad_verification_code") {
 			// invalid code
-			return c.text("", 400);
+			return c.body(null, 400);
 		}
-		return c.text("", 500);
+		return c.body(null, 500);
 	}
 });
 

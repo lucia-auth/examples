@@ -1,6 +1,6 @@
 # GitHub OAuth example in Hono
 
-Uses SQLite (in-memory) database.
+This example is built for Node.js. Uses SQLite (in-memory) database.
 
 ```
 pnpm i

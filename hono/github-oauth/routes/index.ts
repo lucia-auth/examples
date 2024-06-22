@@ -11,10 +11,7 @@ mainRouter.get("/", async (c) => {
 		return c.redirect("/login");
 	}
 	const templateFile = await fs.readFile("routes/index.template.html");
-	let template = templateFile.toString("utf-8");
-	template = template.replaceAll("%username%", user.username);
-	template = template.replaceAll("%user_id%", user.id);
-	return c.text(template, 200, {
-		"Content-Type": "text/html"
-	});
+	const template = templateFile.toString();
+	const html = template.replaceAll("%username%", user.username).replaceAll("%user_id%", user.id);
+	return c.html(html, 200);
 });

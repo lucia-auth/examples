@@ -1,12 +1,12 @@
 import { Hono } from "hono";
 import { renderHTMLTemplate } from "../lib/html.js";
 import { db } from "../lib/db.js";
-import { Argon2id } from "oslo/password";
 import { lucia } from "../lib/auth.js";
 import { SqliteError } from "better-sqlite3";
 import { generateId } from "lucia";
 
 import type { Context } from "../lib/context.js";
+import { hash } from "@node-rs/argon2";
 
 export const signupRouter = new Hono<Context>();
 
@@ -16,9 +16,7 @@ signupRouter.get("/signup", async (c) => {
 		return c.redirect("/");
 	}
 	const html = await renderPage();
-	return c.text(html, 200, {
-		"Content-Type": "text/html"
-	});
+	return c.html(html, 200);
 });
 
 signupRouter.post("/signup", async (c) => {
@@ -32,9 +30,7 @@ signupRouter.post("/signup", async (c) => {
 			username_value: username ?? "",
 			error: "Invalid password"
 		});
-		return c.text(html, 200, {
-			"Content-Type": "text/html"
-		});
+		return c.html(html, 200);
 	}
 	const password: string | null = body.password ?? null;
 	if (!password || password.length < 6 || password.length > 255) {
@@ -42,19 +38,23 @@ signupRouter.post("/signup", async (c) => {
 			username_value: username,
 			error: "Invalid password"
 		});
-		return c.text(html, 200, {
-			"Content-Type": "text/html"
-		});
+		return c.html(html, 200);
 	}
 
-	const hashedPassword = await new Argon2id().hash(password);
+	const passwordHash = await hash(password, {
+		// recommended minimum parameters
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 	const userId = generateId(15);
 
 	try {
-		db.prepare("INSERT INTO user (id, username, password) VALUES(?, ?, ?)").run(
+		db.prepare("INSERT INTO user (id, username, password_hash) VALUES(?, ?, ?)").run(
 			userId,
 			username,
-			hashedPassword
+			passwordHash
 		);
 
 		const session = await lucia.createSession(userId, {});
@@ -66,17 +66,13 @@ signupRouter.post("/signup", async (c) => {
 				username_value: username,
 				error: "Username already used"
 			});
-			return c.text(html, 200, {
-				"Content-Type": "text/html"
-			});
+			return c.html(html, 200);
 		}
 		const html = await renderPage({
 			username_value: username,
 			error: "An unknown error occurred"
 		});
-		return c.text(html, 200, {
-			"Content-Type": "text/html"
-		});
+		return c.html(html, 200);
 	}
 });
 
