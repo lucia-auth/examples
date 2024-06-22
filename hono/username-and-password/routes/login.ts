@@ -2,10 +2,10 @@ import { Hono } from "hono";
 import { renderHTMLTemplate } from "../lib/html.js";
 import { db } from "../lib/db.js";
 import { lucia } from "../lib/auth.js";
+import { verify } from "@node-rs/argon2";
 
 import type { DatabaseUser } from "../lib/db.js";
 import type { Context } from "../lib/context.js";
-import { verify } from "@node-rs/argon2";
 
 export const loginRouter = new Hono<Context>();
 

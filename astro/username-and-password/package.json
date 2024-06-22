@@ -13,10 +13,10 @@
 		"@astrojs/check": "^0.3.4",
 		"@astrojs/node": "^8.0.0",
 		"@lucia-auth/adapter-sqlite": "^3.0.0",
+		"@node-rs/argon2": "^1.8.3",
 		"astro": "^4.2.6",
 		"better-sqlite3": "^9.2.2",
-		"lucia": "^3.0.1",
-		"oslo": "^1.0.3",
+		"lucia": "^3.2.0",
 		"typescript": "^5.3.3"
 	},
 	"devDependencies": {

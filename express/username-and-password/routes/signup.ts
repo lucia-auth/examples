@@ -1,7 +1,7 @@
 import express from "express";
 import { renderHTMLTemplate } from "../lib/html.js";
 import { db } from "../lib/db.js";
-import { Argon2id } from "oslo/password";
+import { hash } from "@node-rs/argon2";
 import { lucia } from "../lib/auth.js";
 import { SqliteError } from "better-sqlite3";
 import { generateId } from "lucia";
@@ -34,14 +34,20 @@ signupRouter.post("/signup", async (req, res) => {
 		return res.setHeader("Content-Type", "text/html").status(400).send(html);
 	}
 
-	const hashedPassword = await new Argon2id().hash(password);
+	const passwordHash = await hash(password, {
+		// recommended minimum parameters
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 	const userId = generateId(15);
 
 	try {
-		db.prepare("INSERT INTO user (id, username, password) VALUES(?, ?, ?)").run(
+		db.prepare("INSERT INTO user (id, username, password_hash) VALUES(?, ?, ?)").run(
 			userId,
 			username,
-			hashedPassword
+			passwordHash
 		);
 
 		const session = await lucia.createSession(userId, {});

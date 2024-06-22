@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { Argon2id } from "oslo/password";
+import { verify } from "@node-rs/argon2";
 import { lucia } from "@/lib/auth";
 
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -37,7 +37,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		return;
 	}
 
-	const validPassword = await new Argon2id().verify(existingUser.password, password);
+	const validPassword = await verify(existingUser.password_hash, password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 	if (!validPassword) {
 		res.status(400).json({
 			error: "Incorrect username or password"

@@ -1,6 +1,6 @@
 import { lucia } from "../../lib/auth";
 import { generateId } from "lucia";
-import { Argon2id } from "oslo/password";
+import { hash } from "@node-rs/argon2";
 import { db } from "../../lib/db";
 import { SqliteError } from "better-sqlite3";
 
@@ -38,14 +38,20 @@ export async function POST(context: APIContext): Promise<Response> {
 		);
 	}
 
-	const hashedPassword = await new Argon2id().hash(password);
+	const passwordHash = await hash(password, {
+		// recommended minimum parameters
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 	const userId = generateId(15);
 
 	try {
-		db.prepare("INSERT INTO user (id, username, password) VALUES(?, ?, ?)").run(
+		db.prepare("INSERT INTO user (id, username, password_hash) VALUES(?, ?, ?)").run(
 			userId,
 			username,
-			hashedPassword
+			passwordHash
 		);
 
 		const session = await lucia.createSession(userId, {});

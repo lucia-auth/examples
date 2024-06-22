@@ -4,9 +4,9 @@ import { db } from "../lib/db.js";
 import { lucia } from "../lib/auth.js";
 import { SqliteError } from "better-sqlite3";
 import { generateId } from "lucia";
+import { hash } from "@node-rs/argon2";
 
 import type { Context } from "../lib/context.js";
-import { hash } from "@node-rs/argon2";
 
 export const signupRouter = new Hono<Context>();
 
