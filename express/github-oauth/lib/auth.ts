@@ -1,10 +1,10 @@
 import { Lucia } from "lucia";
 import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
-import { db } from "./db.js";
+import { db } from "./db.ts";
 import { GitHub } from "arctic";
 import dotenv from "dotenv";
 
-import type { DatabaseUser } from "./db.js";
+import type { DatabaseUser } from "./db.ts";
 
 // import { webcrypto } from "crypto";
 // globalThis.crypto = webcrypto as Crypto;
