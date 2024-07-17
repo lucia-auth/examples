@@ -4,7 +4,7 @@ export const db = sqlite("main.db");
 
 db.exec(`CREATE TABLE IF NOT EXISTS user (
     id TEXT NOT NULL PRIMARY KEY,
-    github_id INTEGER NOT NULL UNIQUE,
+    github_id INTEGER UNIQUE,
     username TEXT NOT NULL
 )`);
 
