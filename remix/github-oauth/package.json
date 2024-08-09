@@ -1,0 +1,40 @@
+{
+  "name": "github-oauth",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "remix vite:build",
+    "dev": "remix vite:dev",
+    "start": "NODE_ENV=production node ./build/server/index.js",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.0",
+    "@lucia-auth/adapter-sqlite": "^3.0.2",
+    "@remix-run/node": "^2.11.1",
+    "@remix-run/react": "^2.11.1",
+    "@remix-run/serve": "^2.11.1",
+    "arctic": "^1.9.2",
+    "better-sqlite3": "^11.1.2",
+    "hono": "^4.5.4",
+    "isbot": "^4",
+    "lucia": "^3.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@hono/vite-dev-server": "^0.13.1",
+    "@remix-run/dev": "^2.11.1",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.17.6",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-tsconfig-paths": "^5.0.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
