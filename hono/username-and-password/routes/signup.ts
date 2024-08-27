@@ -28,7 +28,7 @@ signupRouter.post("/signup", async (c) => {
 	if (!username || username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
 		const html = await renderPage({
 			username_value: username ?? "",
-			error: "Invalid password"
+			error: "Invalid username"
 		});
 		return c.html(html, 200);
 	}
