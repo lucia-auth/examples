@@ -7,19 +7,20 @@
 		"start": "node ./.output/server/index.mjs"
 	},
 	"dependencies": {
-		"@lucia-auth/adapter-sqlite": "^3.0.0",
-		"@solidjs/router": "^0.10.5",
-		"@solidjs/start": "^0.4.2",
-		"arctic": "^0.10.2",
-		"better-sqlite3": "^9.2.2",
-		"lucia": "^3.2.0",
-		"solid-js": "^1.8.7",
-		"vinxi": "0.0.54"
+		"@lucia-auth/adapter-sqlite": "^3.0.2",
+		"@solidjs/router": "^0.14.10",
+		"@solidjs/start": "^1.0.9",
+		"arctic": "^1.9.2",
+		"better-sqlite3": "^9.6.0",
+		"lucia": "^3.2.1",
+		"solid-js": "^1.9.2",
+		"vinxi": "^0.4.3"
 	},
 	"engines": {
 		"node": ">=18"
 	},
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.8"
+		"@types/better-sqlite3": "^7.6.8",
+		"typescript": "^5.6.3"
 	}
 }

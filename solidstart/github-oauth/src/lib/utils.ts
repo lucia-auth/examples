@@ -4,8 +4,8 @@ import { getRequestEvent } from "solid-js/web";
 export const getAuthenticatedUser = cache(async () => {
 	"use server";
 	const event = getRequestEvent()!;
-	if (!event.context.user) {
+	if (!event.locals.user) {
 		throw redirect("/login");
 	}
-	return event.context.user;
+	return event.locals.user;
 }, "user");
